@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme.tsx";
 import { ThemeToggle } from "@/common/ThemeToggle";
@@ -35,10 +35,7 @@ export default function LoginPage() {
     <div className="min-h-screen w-full flex flex-col gap-10 items-center justify-center bg-white dark:bg-slate-950 p-4 select-none relative">
       {/* Top Navigation Controls */}
       <div className="absolute top-3 left-0 right-0 w-full">
-        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
-          <div onClick={() => navigate("/")} className="cursor-pointer w-52 transition-transform hover:scale-105 active:scale-95">
-            <Logo />
-          </div>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-end">
           <ThemeToggle />
         </div>
       </div>
@@ -113,6 +110,19 @@ export default function LoginPage() {
               ) : (
                 "Log in"
               )}
+            </button>
+
+            {/* Quick Admin Access Button */}
+            <button
+              type="button"
+              onClick={() => {
+                toast.success("Navigating to Admin Dashboard...");
+                navigate("/admin");
+              }}
+              className="w-full h-11 border border-blue-500/30 dark:border-blue-500/40 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 font-medium text-sm rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer -mt-6"
+            >
+              <ShieldCheck className="size-4" />
+              Go to Admin Dashboard
             </button>
           </div>
         </form>

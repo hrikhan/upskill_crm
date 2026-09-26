@@ -122,10 +122,17 @@ const SidebarItem = ({ item, location, depth = 0 }: { item: MenuItem; location: 
 interface SidebarProps {
   isMobileOpen: boolean;
   setIsMobileOpen: (open: boolean) => void;
+  config?: any[];
+  basePath?: string;
 }
 
-const Sidebar = ({ isMobileOpen, setIsMobileOpen }: SidebarProps) => {
-  const menu = menuGenerator(adminRoutes, "/admin");
+const Sidebar = ({
+  isMobileOpen,
+  setIsMobileOpen,
+  config = adminRoutes,
+  basePath = "/admin",
+}: SidebarProps) => {
+  const menu = menuGenerator(config, basePath);
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;

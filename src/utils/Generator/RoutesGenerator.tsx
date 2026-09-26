@@ -10,14 +10,18 @@ export type RouteItem = {
   index?: boolean;
   element?: JSX.Element;
   component?: LazyComponent;
-  children?: RouteItem[];
+  children?: any[];
   // Optional: Custom loading fallback
   fallback?: JSX.Element;
+  name?: string;
+  label?: string;
+  icon?: any;
 };
 
 type RouteGroup =
   | {
-      items?: RouteItem[];
+      group?: string;
+      items?: any[];
     }
   | RouteItem;
 
@@ -41,8 +45,13 @@ const createLazyElement = (
   );
 };
 
-const normalizeRoutes = (routes: RouteItem[]): RouteObject[] => {
-  return routes.map((route) => {
+const normalizeRoutes = (routes: any[]): RouteObject[] => {
+  return routes.flatMap((route) => {
+    // If route has `group` and `items`, unpack items
+    if ("items" in route && Array.isArray(route.items)) {
+      return normalizeRoutes(route.items);
+    }
+
     // Determine the element: use lazy component if provided, otherwise use direct element
     const element = route.component
       ? createLazyElement(route.component, route.fallback)
@@ -58,15 +67,10 @@ const normalizeRoutes = (routes: RouteItem[]): RouteObject[] => {
       normalized.children = normalizeRoutes(route.children);
     }
 
-    return normalized;
+    return [normalized];
   });
 };
 
 export const routesGenerator = (input: RouteGroup[]): RouteObject[] => {
-  return input.flatMap((entry) => {
-    if ("items" in entry && entry.items) {
-      return normalizeRoutes(entry.items);
-    }
-    return normalizeRoutes([entry as RouteItem]);
-  });
+  return normalizeRoutes(input);
 };

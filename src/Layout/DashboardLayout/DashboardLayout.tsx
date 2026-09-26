@@ -16,12 +16,20 @@ const routeDescriptions: Record<string, string> = {
   "Help & Support": "Access documentation and raise customer support tickets.",
 };
 
-const DashboardLayout = () => {
+interface DashboardLayoutProps {
+  config?: any[];
+  basePath?: string;
+}
+
+const DashboardLayout = ({
+  config = adminRoutes,
+  basePath = "/admin",
+}: DashboardLayoutProps) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
 
   // Dynamically resolve active route name
-  const menu = menuGenerator(adminRoutes, "/admin");
+  const menu = menuGenerator(config, basePath);
 
   const findActiveItem = (items: any[]): any => {
     for (const item of items) {
@@ -33,7 +41,7 @@ const DashboardLayout = () => {
     }
     // Fallback: match prefix if not exact match (excluding base paths)
     for (const item of items) {
-      if (item.path && item.path !== "/admin" && location.pathname.startsWith(item.path)) {
+      if (item.path && item.path !== basePath && location.pathname.startsWith(item.path)) {
         return item;
       }
     }
@@ -49,7 +57,12 @@ const DashboardLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-layout-bg">
       {/* 1. Fixed Sidebar */}
-      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
+      <Sidebar
+        isMobileOpen={isMobileOpen}
+        setIsMobileOpen={setIsMobileOpen}
+        config={config}
+        basePath={basePath}
+      />
 
       {/* Backdrop overlay for mobile */}
       {isMobileOpen && (
@@ -70,7 +83,7 @@ const DashboardLayout = () => {
         <main className="flex-1 px-6 py-6">
           {/* Breadcrumbs (Optional) */}
           <div className="mb-4">
-            <Breadcrumbs config={adminRoutes} basePath="/admin" />
+            <Breadcrumbs config={config} basePath={basePath} />
           </div>
           <Outlet />
         </main>

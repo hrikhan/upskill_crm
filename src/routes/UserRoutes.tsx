@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import {
   ChartPie,
   FileText,
@@ -14,6 +14,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 
 import Loadable from "@/utils/Loadable";
 import { UserSkeleton } from "@/common/Skeleton/User/UserSkeleton";
+import DashboardLayout from "@/Layout/DashboardLayout/DashboardLayout";
 
 const UserDashboard = Loadable(
   lazy(() => import("@/pages/UserDashboard/UserDashboard")),
@@ -22,81 +23,95 @@ const UserDashboard = Loadable(
 
 const DummyPage = UserDashboard;
 
+const UserDashboardLayout = () => (
+  <DashboardLayout config={userRoutes} basePath="/user" />
+);
+
 export const userRoutes = [
   {
-    group: "Main Menu",
-    items: [
+    path: "/user",
+    element: <UserDashboardLayout />,
+    children: [
       {
-        icon: <ChartPie />,
-        name: "Overview",
-        path: "overview",
-        element: <UserDashboard />,
+        index: true,
+        element: <Navigate to="/user/overview" replace />,
       },
       {
-        icon: <FileText />,
-        name: "Reports",
-        path: "reports",
-        element: <Outlet />,
-        children: [
-          { name: "All Reports", path: "all", element: <DummyPage /> }
+        group: "Main Menu",
+        items: [
+          {
+            icon: <ChartPie />,
+            name: "Overview",
+            path: "overview",
+            element: <UserDashboard />,
+          },
+          {
+            icon: <FileText />,
+            name: "Reports",
+            path: "reports",
+            element: <Outlet />,
+            children: [
+              { name: "All Reports", path: "all", element: <DummyPage /> }
+            ],
+          },
+          {
+            icon: <List />,
+            name: "Items",
+            path: "items",
+            element: <Outlet />,
+            children: [
+              { name: "All Items", path: "all", element: <DummyPage /> }
+            ],
+          },
+          {
+            icon: <Package />,
+            name: "Inventory",
+            path: "inventory",
+            element: <Outlet />,
+            children: [
+              { name: "Current Inventory", path: "current", element: <DummyPage /> }
+            ],
+          },
+          {
+            icon: <Users />,
+            name: "Employees",
+            path: "employees",
+            element: <Outlet />,
+            children: [
+              { name: "All Employees", path: "all", element: <DummyPage /> }
+            ],
+          },
+          {
+            icon: <User />,
+            name: "Customers",
+            path: "customers",
+            element: <DummyPage />,
+          },
+          {
+            icon: <Network />,
+            name: "Integrations",
+            path: "integrations",
+            element: <Outlet />,
+            children: [
+              { name: "Active Integrations", path: "active", element: <DummyPage /> }
+            ],
+          },
+          {
+            icon: <Headphones />,
+            name: "Help",
+            path: "help",
+            element: <Outlet />,
+            children: [
+              { name: "Support Center", path: "support", element: <DummyPage /> }
+            ],
+          },
+          {
+            icon: <IoSettingsOutline className="size-6" />,
+            name: "settings",
+            path: "settings",
+            element: <DummyPage />,
+          },
         ],
-      },
-      {
-        icon: <List />,
-        name: "Items",
-        path: "items",
-        element: <Outlet />,
-        children: [
-          { name: "All Items", path: "all", element: <DummyPage /> }
-        ],
-      },
-      {
-        icon: <Package />,
-        name: "Inventory",
-        path: "inventory",
-        element: <Outlet />,
-        children: [
-          { name: "Current Inventory", path: "current", element: <DummyPage /> }
-        ],
-      },
-      {
-        icon: <Users />,
-        name: "Employees",
-        path: "employees",
-        element: <Outlet />,
-        children: [
-          { name: "All Employees", path: "all", element: <DummyPage /> }
-        ],
-      },
-      {
-        icon: <User />,
-        name: "Customers",
-        path: "customers",
-        element: <DummyPage />,
-      },
-      {
-        icon: <Network />,
-        name: "Integrations",
-        path: "integrations",
-        element: <Outlet />,
-        children: [
-          { name: "Active Integrations", path: "active", element: <DummyPage /> }
-        ],
-      },
-      {
-        icon: <Headphones />,
-        name: "Help",
-        path: "help",
-        element: <Outlet />,
-        children: [
-          { name: "Support Center", path: "support", element: <DummyPage /> }
-        ],
-      },
-      {
-        icon: <IoSettingsOutline className="size-6" />,
-        name: "settings",
-        path: "settings",
-        element: <DummyPage />,
       },
     ],
   },

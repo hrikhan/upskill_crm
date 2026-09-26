@@ -11,7 +11,7 @@ export type MenuItem = {
 export type RouteItem = {
   path?: string;
   element?: JSX.Element;
-  children?: RouteItem[];
+  children?: (RouteGroup | RouteItem)[];
   icon?: JSX.Element;
   name?: string;
   label?: string;
@@ -26,16 +26,32 @@ export type RouteGroup =
   | RouteItem;
 
 export const menuGenerator = (
-  routes: RouteGroup[],
+  routes: any[],
   parentPath = ""
 ): MenuItem[] => {
   return routes.flatMap((route) => {
-    // Group with items
+    // If it's a wrapper object (like { path: "/founder", element: <Layout />, children: [...] })
+    // and has children but no label/name of its own:
+    if (
+      !route.label &&
+      !route.name &&
+      route.children &&
+      Array.isArray(route.children)
+    ) {
+      const currentBase = route.path
+        ? route.path.startsWith("/")
+          ? route.path
+          : `${parentPath}/${route.path}`
+        : parentPath;
+      return menuGenerator(route.children, currentBase);
+    }
+
+    // Group with items (like { group: "Manage", items: [...] })
     if ("items" in route && Array.isArray(route.items)) {
       return route.items
-        .map((item) => menuGenerator([item], parentPath))
+        .map((item: any) => menuGenerator([item], parentPath))
         .flat()
-        .map((child) => ({
+        .map((child: MenuItem) => ({
           group: route.group,
           ...child,
         }));
