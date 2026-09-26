@@ -7,9 +7,10 @@ import { RouteGroup } from "@/utils/Generator/MenuGenerator";
 interface BreadcrumbProps {
   config: RouteGroup[];
   basePath: string;
+  className?: string;
 }
 
-const Breadcrumbs = ({ config, basePath }: BreadcrumbProps) => {
+const Breadcrumbs = ({ config, basePath, className }: BreadcrumbProps) => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -20,7 +21,7 @@ const Breadcrumbs = ({ config, basePath }: BreadcrumbProps) => {
   );
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-muted-blue mb-6 px-1">
+    <nav className={className ? `flex items-center space-x-2 text-sm text-muted-blue ${className}` : "flex items-center space-x-2 text-sm text-muted-blue mb-6 px-1"}>
       <Link to={basePath} className="text-muted-blue hover:text-slate-800 transition-colors">
         <Home className="size-4" />
       </Link>
@@ -38,6 +39,9 @@ const Breadcrumbs = ({ config, basePath }: BreadcrumbProps) => {
           rawSegment
             .replace(/-/g, " ")
             .replace(/\b\w/g, (l) => l.toUpperCase());
+
+        // Target path: navigate to child route if the parent is a dropdown container
+        const destination = routeData?.targetPath || to;
 
         const renderIcon = () => {
           if (!routeData?.icon || !isValidElement(routeData.icon)) return null;
@@ -58,7 +62,7 @@ const Breadcrumbs = ({ config, basePath }: BreadcrumbProps) => {
                 <span className="text-[#2F65C8] font-normal">{displayName}</span>
               ) : (
                 <Link
-                  to={to}
+                  to={destination}
                   className="text-muted-blue hover:text-slate-800 transition-colors no-underline font-normal"
                 >
                   {displayName}

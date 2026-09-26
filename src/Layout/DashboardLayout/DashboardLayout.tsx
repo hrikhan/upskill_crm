@@ -78,13 +78,10 @@ const DashboardLayout = ({
           title={title} 
           description={description} 
           onMenuClick={() => setIsMobileOpen(true)}
+          breadcrumbs={<Breadcrumbs config={config} basePath={basePath} className="mb-0 px-0" />}
         />
 
-        <main className="flex-1 px-6 py-6">
-          {/* Breadcrumbs (Optional) */}
-          <div className="mb-4">
-            <Breadcrumbs config={config} basePath={basePath} />
-          </div>
+        <main className="flex-1 px-6 py-6 bg-layout-bg">
           <Outlet />
         </main>
       </div>

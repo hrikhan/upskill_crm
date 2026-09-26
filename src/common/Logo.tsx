@@ -12,8 +12,8 @@ const Logo = ({ className, imgClassName, collapsed }: LogoProps) => {
   return (
     <div className={cn("flex items-center justify-center select-none", className)}>
       <img
-        src="/BaseKit.png"
-        alt="BaseKit Logo"
+        src="/crm.webp"
+        alt="CRM Logo"
         className={cn(collapsed ? "w-11/12" : "w-3/4", "mx-auto object-contain shrink-0", imgClassName)}
       />
     </div>

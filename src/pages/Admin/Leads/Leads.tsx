@@ -1,7 +1,7 @@
 import WorkInProgress from "@/common/WorkInProgress";
 
-const Support = () => {
+const Leads = () => {
   return <WorkInProgress title="WORK IN PROGRESS" />;
 };
 
-export default Support;
+export default Leads;

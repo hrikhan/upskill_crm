@@ -21,6 +21,7 @@ interface HeaderProps {
   title?: string;
   description?: string;
   onMenuClick?: () => void;
+  breadcrumbs?: React.ReactNode;
 }
 
 interface NotificationItem {
@@ -69,7 +70,7 @@ const initialNotifications: NotificationItem[] = [
   },
 ];
 
-const Header = ({ title, description, onMenuClick }: HeaderProps) => {
+const Header = ({ title, description, onMenuClick, breadcrumbs }: HeaderProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -121,9 +122,9 @@ const Header = ({ title, description, onMenuClick }: HeaderProps) => {
   };
 
   return (
-    <header className="relative h-20 min-h-20 bg-primary-background sticky top-0 z-30 flex items-center mx-6 rounded-b-xl shadow-md">
+    <header className="relative h-20 min-h-20 bg-primary-background sticky top-0 z-30 flex items-center rounded-b-xl border-b border-border">
       <div className="flex items-center justify-between w-full px-6">
-        {/* Left Side: Hamburger & Title & Description */}
+        {/* Left Side: Hamburger & Breadcrumbs (or Title fallback) */}
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button
             onClick={onMenuClick}
@@ -132,16 +133,22 @@ const Header = ({ title, description, onMenuClick }: HeaderProps) => {
             <Menu className="w-6 h-6" />
           </button>
 
-          <div className="flex flex-col min-w-0">
-            <h1 className="text-base sm:text-lg font-semibold text-primary-text leading-tight truncate">
-              {title || "Overview"}
-            </h1>
-            {description && (
-              <p className="text-xs text-muted-blue mt-0.5 font-medium hidden sm:block truncate">
-                {description}
-              </p>
-            )}
-          </div>
+          {breadcrumbs ? (
+            <div className="flex items-center min-w-0">
+              {breadcrumbs}
+            </div>
+          ) : (
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-base sm:text-lg font-semibold text-primary-text leading-tight truncate">
+                {title || "Overview"}
+              </h1>
+              {description && (
+                <p className="text-xs text-muted-blue mt-0.5 font-medium hidden sm:block truncate">
+                  {description}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Side: Actions & Profile */}

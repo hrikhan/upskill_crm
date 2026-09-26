@@ -1,9 +1,9 @@
-const WorkInProgress = ({ title }: { title: string }) => {
+const WorkInProgress = ({ title = "WORK IN PROGRESS" }: { title?: string }) => {
   return (
-    <div className="w-full h-[90vh] flex items-center justify-center px-6">
+    <div className="w-full h-[65vh] flex items-center justify-center px-6">
       <h1
         className="font-black uppercase text-center leading-tight tracking-widest text-slate-200! dark:text-slate-700 select-none"
-        style={{ fontSize: "clamp(1rem, 8vw, 4rem)" }}
+        style={{ fontSize: "clamp(1rem, 8vw, 5rem)" }}
       >
         {title}
       </h1>

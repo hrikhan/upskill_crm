@@ -47,11 +47,11 @@ const SidebarItem = ({ item, location, depth = 0 }: { item: MenuItem; location: 
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
               "flex items-center justify-between w-full rounded-xl transition-all duration-200 group cursor-pointer",
-              depth === 0 ? "h-12 px-4 text-base font-semibold" : "h-10 px-3 text-[15px] font-medium",
+              depth === 0 ? "h-12 px-4 text-sm font-medium" : "h-10 px-3 text-sm font-medium",
               isActive 
                 ? depth === 0
-                  ? "bg-brand-gradient text-white font-semibold"
-                  : "text-secondary-brand font-semibold"
+                  ? "bg-brand-gradient text-white font-medium"
+                  : "text-secondary-brand font-medium"
                 : "text-muted-blue hover:bg-light-background hover:text-primary-text"
             )}
           >
@@ -94,11 +94,11 @@ const SidebarItem = ({ item, location, depth = 0 }: { item: MenuItem; location: 
           to={item.path || "#"}
           className={cn(
             "flex items-center gap-3 rounded-xl transition-all duration-200 no-underline! group",
-            depth === 0 ? "h-12 px-4 text-base font-semibold" : "h-10 px-3 text-[15px] font-medium",
+            depth === 0 ? "h-12 px-4 text-sm font-medium" : "h-10 px-3 text-sm font-medium",
             isActive
               ? depth === 0
-                ? "bg-brand-gradient text-white font-semibold"
-                : "text-secondary-brand font-semibold"
+                ? "bg-brand-gradient text-white font-medium"
+                : "text-secondary-brand font-medium"
               : "text-muted-blue hover:bg-light-background hover:text-primary-text"
           )}
         >
@@ -197,10 +197,10 @@ const Sidebar = ({
   return (
     <aside
       className={cn(
-        "bg-primary-background text-primary-text h-screen flex flex-col transition-all duration-300 z-50 shrink-0 shadow-lg",
+        "bg-primary-background text-primary-text h-screen flex flex-col transition-all duration-300 z-50 shrink-0 border-r border-border rounded-br-xl",
         // Desktop layouts
         "sm:sticky sm:top-0 sm:translate-x-0",
-        showCollapsed ? "sm:w-20" : "sm:w-[280px]",
+        showCollapsed ? "sm:w-20" : "sm:w-[260px]",
         // Mobile layouts (drawer overlay style)
         "fixed left-0 top-0 h-screen w-[280px] sm:static",
         isMobileOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
@@ -230,7 +230,7 @@ const Sidebar = ({
         {Object.entries(groupedMenu).map(([group, items]) => (
           <div key={group} className="space-y-2">
             {!showCollapsed && (
-              <span className="text-xs uppercase tracking-wider font-semibold text-muted-blue px-4 block">
+              <span className="text-xs uppercase tracking-wider font-medium text-muted-blue px-4 block">
                 {group}
               </span>
             )}
@@ -291,7 +291,7 @@ const Sidebar = ({
                 className="w-12 h-12 rounded-xl border border-border object-cover"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-primary-text leading-tight">Alex</span>
+                <span className="text-sm font-medium text-primary-text leading-tight">Alex</span>
                 <span className="text-xs text-muted-blue leading-tight mt-0.5">Manager Admin</span>
               </div>
             </div>

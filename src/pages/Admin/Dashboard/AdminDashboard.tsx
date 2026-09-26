@@ -1,11 +1,7 @@
-import CommonWrapper from "@/common/CommonWrapper";
+import WorkInProgress from "@/common/WorkInProgress";
 
 const AdminDashboard = () => {
-  return (
-    <CommonWrapper>
-      <div>AdminDashboard</div>
-    </CommonWrapper>
-  );
+  return <WorkInProgress title="WORK IN PROGRESS" />;
 };
 
 export default AdminDashboard;
