@@ -1,0 +1,462 @@
+/* =======================
+   📦 Font Imports
+========================== */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100..900;1,100..900&display=swap");
+
+/* =======================
+   📦 Tailwind Import
+========================== */
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =======================
+   🌈 Root Design Tokens
+========================== */
+:root {
+  /* --- Light Mode (Default) --- */
+  --primary-background: #ffffff;
+  --light-background: #f1f5f9;
+  --primary-brand: #161e49;
+  --secondary-brand: #0082fa;
+  --primary-text: #161e49;
+  --secondary-text: #64748b;
+  
+  --font-main: "Montserrat", sans-serif;
+  --font-secondary: "Poppins", sans-serif;
+  
+  --border-color: #e2e8f0;
+  --bg-stripe-1: #ffffff;
+  --bg-stripe-2: #f8fafc;
+
+  --primary-green: #08ad36;
+  --light-green: #08ad361a;
+  --primary-yellow: #fcab3f;
+  --light-yellow: #fcab3f1a;
+  --primary-red: #ff0000;
+  --light-red: #ff00001a;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+
+  /* Brand Styling Custom Tokens */
+  --brand-gradient: linear-gradient(180deg, #528FFF 0%, #004DDD 100%);
+  --layout-bg: #F6F9FF;
+  --muted-blue: #8188A2;
+
+  /* Status Colors */
+  --status-success: #169E7B;
+  --status-danger: #DA4352;
+  --status-warning: #DB940C;
+  --status-success-alt: #0DD825;
+
+  /* Surface tokens (from alexjlouis) */
+  --Greyscale-500: #ffffff;
+  --Greyscale-400: #8188A2;
+  --Secondary-100: #2B353D;
+}
+
+.dark {
+  /* --- Dark Mode Palette --- */
+  --primary-background: #020617;
+  --light-background: #0f172a;
+  --primary-brand: #3b82f6;
+  --secondary-brand: #3b82f6;
+  --primary-text: #f8fafc;
+  --secondary-text: #94a3b8;
+  
+  --border-color: #1e293b;
+  --bg-stripe-1: #0f172a;
+  --bg-stripe-2: #020617;
+
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+
+  /* Brand Styling Custom Tokens in Dark Mode */
+  --layout-bg: #090d16;
+  --muted-blue: #64748b;
+
+  /* Status Colors (dark mode same values) */
+  --status-success: #169E7B;
+  --status-danger: #DA4352;
+
+  /* Surface tokens dark */
+  --Greyscale-500: #0f172a;
+  --Greyscale-400: #94a3b8;
+  --Secondary-100: #f8fafc;
+}
+
+/* =======================
+   🎨 Tailwind Theme Configuration
+========================== */
+@theme {
+  /* Colors */
+  --color-primary-background: var(--primary-background);
+  --color-light-background: var(--light-background);
+  --color-primary-brand: var(--primary-brand);
+  --color-secondary-brand: var(--secondary-brand);
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+  --color-border: var(--border-color);
+  
+  --color-primary-green: var(--primary-green);
+  --color-light-green: var(--light-green);
+  --color-primary-red: var(--primary-red);
+  --color-primary-yellow: var(--primary-yellow);
+  --color-stripe-1: var(--bg-stripe-1);
+  --color-stripe-2: var(--bg-stripe-2);
+  
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  /* Fonts */
+  --font-montserrat: var(--font-main);
+  --font-poppins: var(--font-secondary);
+
+  /* Custom Sidebar & Layout Styles */
+  --color-layout-bg: var(--layout-bg);
+  --color-muted-blue: var(--muted-blue);
+  --background-image-brand-gradient: var(--brand-gradient);
+
+  /* Status & Brand Color Tokens */
+  --color-status-success: var(--status-success);
+  --color-status-danger: var(--status-danger);
+  --color-status-warning: var(--status-warning);
+  --color-secondary-text: var(--secondary-text);
+}
+
+/* =======================
+   ✨ Base Styles
+========================== */
+@layer base {
+  html,
+  body {
+    font-family: var(--font-main);
+    background-color: var(--primary-background);
+    color: var(--primary-text);
+    line-height: var(--leading-normal);
+  }
+
+  /* ── Theme switch: View Transitions API ──────────────────
+     Radial reveal from the toggle button position.
+     startViewTransition() is called in ThemeToggle.tsx;
+     the CSS here controls the clip-path animation.
+  ─────────────────────────────────────────────────────── */
+
+  /* Disable the browser's default cross-fade */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /* Old layer sits static underneath — no animation, no second circle */
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+
+  /* New layer expands as a single circle from the button origin */
+  ::view-transition-new(root) {
+    z-index: 9999;
+    animation: theme-reveal 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+
+  *:focus,
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Typography Hierarchy */
+  h1 {
+    font-size: clamp(var(--text-3xl), 3vw + 1rem, var(--text-4xl));
+    font-weight: 600;
+    line-height: var(--leading-tight);
+  }
+
+  h2 {
+    font-size: clamp(var(--text-xl), 2vw + 0.5rem, var(--text-2xl));
+    font-weight: 600;
+    line-height: var(--leading-snug);
+  }
+
+  h3 {
+    font-size: clamp(var(--text-lg), 2vw + 0.25rem, var(--text-xl));
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  h4 {
+    font-size: var(--text-lg);
+    font-weight: 500;
+  }
+
+  h5 {
+    font-size: var(--text-base);
+    font-weight: 400;
+  }
+
+  h6 {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--secondary-text);
+  }
+
+  p {
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: var(--leading-relaxed);
+  }
+
+  /* ── Typography Utilities (from alexjlouis design system) ── */
+  .text-body {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .text-button {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0.01em;
+  }
+
+  .text-small {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .text-paragraph {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0.005em;
+  }
+
+  .text-title {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0.18px;
+    word-wrap: break-word;
+    color: var(--Greyscale-400, #8188A2);
+  }
+
+  .text-table {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    word-wrap: break-word;
+    color: var(--Secondary-100, #2B353D);
+  }
+
+  .text-card {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    word-wrap: break-word;
+    color: var(--Secondary-100, #2B353D);
+  }
+}
+
+/* =======================
+   🧩 Component Styles
+========================== */
+@layer components {
+  .custom-checkbox {
+    @apply appearance-none h-4 w-4 border-2 rounded cursor-pointer transition-all duration-200;
+    border-color: var(--primary-blue);
+  }
+
+  .custom-checkbox:checked {
+    background-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px var(--light-green);
+  }
+
+  .custom-checkbox-red {
+    @apply appearance-none h-4 w-4 border-2 rounded cursor-pointer transition-all duration-200;
+    border-color: var(--primary-red);
+  }
+
+  .custom-checkbox-red:checked {
+    background-color: var(--primary-red);
+    box-shadow: 0 0 0 4px var(--light-red);
+  }
+}
+
+/* ── Theme transition @keyframes ──────────────────────────────
+   clip-path origin is set via --vt-x / --vt-y on <html>
+   by ThemeToggle.tsx using element.style.setProperty().
+────────────────────────────────────────────────────────────── */
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 95%) var(--vt-y, 5%));
+  }
+
+  to {
+    clip-path: circle(150% at var(--vt-x, 95%) var(--vt-y, 5%));
+  }
+}
+
+/* Custom Utilities for Sidebar & Buttons */
+.bg-brand-gradient {
+  background-image: var(--brand-gradient);
+}
+.text-muted-blue {
+  color: var(--muted-blue);
+}
+.bg-layout-bg {
+  background-color: var(--layout-bg);
+}
+
+/* ============================================================
+   SURFACE UTILITY — white card bg + configurable shadow
+   ============================================================ */
+.surface {
+  background: var(--Greyscale-500, white);
+}
+
+.surface[class*="shadow-"] {
+  --sx: 0px;
+  --sy: 0px;
+  --sblur: 14px;
+  --sspread: 0px;
+  --scolor: rgba(130, 136, 162, 0.12);
+  box-shadow: var(--sx) var(--sy) var(--sblur) var(--sspread) var(--scolor);
+}
+
+.surface.shadow-all {
+  --sx: 0px;
+  --sy: 0px;
+  --sblur: 14px;
+}
+
+.surface.shadow-t  { --sx: 0px;  --sy: -6px; --sblur: 14px; }
+.surface.shadow-b  { --sx: 0px;  --sy: 6px;  --sblur: 14px; }
+.surface.shadow-l  { --sx: -6px; --sy: 0px;  --sblur: 14px; }
+.surface.shadow-r  { --sx: 6px;  --sy: 0px;  --sblur: 14px; }
+.surface.shadow-tl { --sx: -6px; --sy: -6px; --sblur: 14px; }
+.surface.shadow-tr { --sx: 6px;  --sy: -6px; --sblur: 14px; }
+.surface.shadow-bl { --sx: -6px; --sy: 6px;  --sblur: 14px; }
+.surface.shadow-rb { --sx: 6px;  --sy: 6px;  --sblur: 14px; }
+
+/* Dark mode surface */
+.dark .surface {
+  background: var(--Greyscale-500, #0f172a);
+}
+
+.dark .surface[class*="shadow-"] {
+  --scolor: rgba(0, 0, 0, 0.35);
+}
+
+.dark .surface.shadow-all { --sx: 0px; --sy: 0px; --sblur: 18px; }
+.dark .surface.shadow-t   { --sx: 0px;  --sy: -6px; --sblur: 18px; }
+.dark .surface.shadow-b   { --sx: 0px;  --sy: 6px;  --sblur: 18px; }
+.dark .surface.shadow-l   { --sx: -6px; --sy: 0px;  --sblur: 18px; }
+.dark .surface.shadow-r   { --sx: 6px;  --sy: 0px;  --sblur: 18px; }
+
+/* Status color text utilities */
+.text-status-success { color: var(--status-success); }
+.text-status-danger  { color: var(--status-danger);  }
+.text-status-warning { color: var(--status-warning); }
+.text-secondary-text { color: var(--secondary-text); }
+
+/* ========================================================
+   💅 Custom Premium Scrollbar Styles (All Scrollable Areas)
+   ======================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(47, 101, 200, 0.4) transparent;
+}
+
+/* Webkit browser engines (Chrome, Safari, Edge, etc.) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(47, 101, 200, 0.4); /* Primary theme blue #2F65C8 at 40% opacity */
+  border-radius: 9999px;
+  transition: background 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(47, 101, 200, 0.8); /* Primary theme blue #2F65C8 at 80% opacity */
+}
+
+/* ========================================================
+   📝 Dynamic Form Inputs & Selects & Calendar Backgrounds
+   ======================================================== */
+/* Change background of all text inputs, textareas, selects, and pickers inside forms to layout-bg */
+form input:not([type="checkbox"]):not([type="radio"]),
+form textarea,
+form select,
+form button.bg-light-background,
+form .bg-light-background {
+  background-color: var(--layout-bg) !important;
+}
+
+/* Ensure focus states are clean and don't revert to white bg */
+form input:not([type="checkbox"]):not([type="radio"]):focus,
+form textarea:focus,
+form select:focus {
+  background-color: var(--primary-background) !important; /* matches focus:bg-primary-background */
+}
+
+/* Calendar Popover and Calendar component styling */
+.custom-calendar-wrapper,
+.react-calendar {
+  background-color: var(--layout-bg) !important;
+}
+
+/* Calendar Width Constraint to match trigger field exactly */
+.react-calendar {
+  width: 100% !important;
+  max-width: 100% !important;
+  border: none !important;
+  font-family: inherit !important;
+}
+
+.custom-calendar-wrapper {
+  background-color: var(--layout-bg) !important;
+  width: 100% !important;
+}
+
+/* Standardize react-calendar inner components */
+.react-calendar__navigation {
+  background-color: var(--layout-bg) !important;
+}
+
+.react-calendar__viewContainer {
+  background-color: var(--layout-bg) !important;
+}
+
+.react-calendar__tile {
+  background-color: var(--layout-bg) !important;
+}
+
+.react-calendar__tile:hover {
+  background-color: rgba(47, 101, 200, 0.1) !important;
+  border-radius: 6px;
+}
+
+.react-calendar__tile--active,
+.react-calendar__tile--hasActive {
+  background: var(--brand-gradient) !important;
+  color: white !important;
+  border-radius: 6px;
+}
