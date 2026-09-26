@@ -81,7 +81,7 @@ const DashboardLayout = ({
           breadcrumbs={<Breadcrumbs config={config} basePath={basePath} className="mb-0 px-0" />}
         />
 
-        <main className="flex-1 px-6 py-6 bg-layout-bg">
+        <main className="flex-1 p-4 bg-layout-bg">
           <Outlet />
         </main>
       </div>

@@ -65,7 +65,7 @@ export function FilterDatePicker({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-[var(--anchor-width)] min-w-[240px] p-3 bg-white dark:bg-slate-900 rounded-lg"
+          className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-3 bg-white dark:bg-slate-900 rounded-lg border border-border"
           style={{ boxShadow: "0px 2px 20px rgba(100, 116, 139, 0.12)" }}
           align="center"
         >

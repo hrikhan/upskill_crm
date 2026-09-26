@@ -49,7 +49,7 @@ export function FilterSelect({
           </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--anchor-width)] p-1.5 bg-white dark:bg-slate-900 rounded-lg"
+        className="w-[var(--radix-popover-trigger-width)] p-1.5 bg-white dark:bg-slate-900 rounded-lg border border-border"
         style={{ boxShadow: "0px 2px 20px rgba(100, 116, 139, 0.12)" }}
         align="start"
         sideOffset={8}

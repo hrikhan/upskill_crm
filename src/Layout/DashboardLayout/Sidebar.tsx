@@ -270,7 +270,7 @@ const Sidebar = ({
       </nav>
 
       {/* User Profile Card at Bottom */}
-      <div className="p-4 pb-6 border-t border-border mt-auto shrink-0">
+      <div className="p-4 border-t border-border mt-auto shrink-0">
         {showCollapsed ? (
           <div className="flex flex-col items-center gap-4">
             <img
