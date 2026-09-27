@@ -1,13 +1,32 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
-import type { RootState } from "../store/store";
+import { usePermissions } from "@/hooks/usePermissions";
+import { ModulePermissionKey, UserRole } from "@/types/auth";
+import Unauthorized from "@/common/Unauthorized";
 
-const ProtectedRoute = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
+interface ProtectedRouteProps {
+  requiredModule?: ModulePermissionKey;
+  requiredRole?: UserRole[];
+}
 
-  // Check if the user is logged in and is an admin
-  if (!user || user.role !== "admin") {
+export const ProtectedRoute = ({
+  requiredModule,
+  requiredRole,
+}: ProtectedRouteProps) => {
+  const { user, hasPermission } = usePermissions();
+
+  // If not logged in, redirect to login page
+  if (!user || !user.role) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If specific roles required (e.g. ['super_admin'])
+  if (requiredRole && !requiredRole.includes(user.role)) {
+    return <Unauthorized />;
+  }
+
+  // If specific module permission required
+  if (requiredModule && !hasPermission(requiredModule)) {
+    return <Unauthorized />;
   }
 
   return <Outlet />;

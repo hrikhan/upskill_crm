@@ -12,123 +12,134 @@ import {
   MessageSquare,
   Users,
   BarChart3,
+  Crown,
 } from "lucide-react";
 
 import Loadable from "@/utils/Loadable";
 import { AdminSkeleton } from "@/common/Skeleton/Admin/AdminSkeleton";
 import DashboardLayout from "@/Layout/DashboardLayout/DashboardLayout";
 
+// Super Admin Exclusive
+const Admins = Loadable(
+  lazy(() => import("@/pages/Admins/Admins")),
+  AdminSkeleton
+);
+
 // Overview Dashboard
 const AdminDashboard = Loadable(
-  lazy(() => import("@/pages/Admin/Dashboard/Overview/Overview")),
+  lazy(() => import("@/pages/Dashboard/Overview/Overview")),
   AdminSkeleton
 );
 
 // Customers
 const Clients = Loadable(
-  lazy(() => import("@/pages/Admin/Customers/Clients/Clients")),
+  lazy(() => import("@/pages/Customers/Clients/Clients")),
   AdminSkeleton
 );
 const ClientUsers = Loadable(
-  lazy(() => import("@/pages/Admin/Customers/ClientUsers/ClientUsers")),
+  lazy(() => import("@/pages/Customers/ClientUsers/ClientUsers")),
   AdminSkeleton
 );
 
 // Projects
 const Projects = Loadable(
-  lazy(() => import("@/pages/Admin/Projects/Projects/Projects")),
+  lazy(() => import("@/pages/Projects/Projects/Projects")),
   AdminSkeleton
 );
 const ProjectTemplates = Loadable(
-  lazy(() => import("@/pages/Admin/Projects/Templates/Templates")),
+  lazy(() => import("@/pages/Projects/Templates/Templates")),
   AdminSkeleton
 );
 
 // Sales
 const Invoices = Loadable(
-  lazy(() => import("@/pages/Admin/Sales/Invoices/Invoices")),
+  lazy(() => import("@/pages/Sales/Invoices/Invoices")),
   AdminSkeleton
 );
 const Payments = Loadable(
-  lazy(() => import("@/pages/Admin/Sales/Payments/Payments")),
+  lazy(() => import("@/pages/Sales/Payments/Payments")),
   AdminSkeleton
 );
 const Estimates = Loadable(
-  lazy(() => import("@/pages/Admin/Sales/Estimates/Estimates")),
+  lazy(() => import("@/pages/Sales/Estimates/Estimates")),
   AdminSkeleton
 );
 const Subscriptions = Loadable(
-  lazy(() => import("@/pages/Admin/Sales/Subscriptions/Subscriptions")),
+  lazy(() => import("@/pages/Sales/Subscriptions/Subscriptions")),
   AdminSkeleton
 );
 const Products = Loadable(
-  lazy(() => import("@/pages/Admin/Sales/Products/Products")),
+  lazy(() => import("@/pages/Sales/Products/Products")),
   AdminSkeleton
 );
 const Expenses = Loadable(
-  lazy(() => import("@/pages/Admin/Sales/Expenses/Expenses")),
+  lazy(() => import("@/pages/Sales/Expenses/Expenses")),
   AdminSkeleton
 );
 
 // Proposals
 const Proposals = Loadable(
-  lazy(() => import("@/pages/Admin/Proposals/Proposals/Proposals")),
+  lazy(() => import("@/pages/Proposals/Proposals/Proposals")),
   AdminSkeleton
 );
 const ProposalTemplates = Loadable(
-  lazy(() => import("@/pages/Admin/Proposals/Templates/Templates")),
+  lazy(() => import("@/pages/Proposals/Templates/Templates")),
   AdminSkeleton
 );
 
 // Contracts
 const Contracts = Loadable(
-  lazy(() => import("@/pages/Admin/Contracts/Contracts/Contracts")),
+  lazy(() => import("@/pages/Contracts/Contracts/Contracts")),
   AdminSkeleton
 );
 const ContractTemplates = Loadable(
-  lazy(() => import("@/pages/Admin/Contracts/Templates/Templates")),
+  lazy(() => import("@/pages/Contracts/Templates/Templates")),
   AdminSkeleton
 );
 
 // Support
 const Tickets = Loadable(
-  lazy(() => import("@/pages/Admin/Support/Tickets/Tickets")),
+  lazy(() => import("@/pages/Support/Tickets/Tickets")),
   AdminSkeleton
 );
 const Canned = Loadable(
-  lazy(() => import("@/pages/Admin/Support/Canned/Canned")),
+  lazy(() => import("@/pages/Support/Canned/Canned")),
   AdminSkeleton
 );
 const Knowledgebase = Loadable(
-  lazy(() => import("@/pages/Admin/Support/Knowledgebase/Knowledgebase")),
+  lazy(() => import("@/pages/Support/Knowledgebase/Knowledgebase")),
   AdminSkeleton
 );
 const Messages = Loadable(
-  lazy(() => import("@/pages/Admin/Support/Messages/Messages")),
+  lazy(() => import("@/pages/Support/Messages/Messages")),
   AdminSkeleton
 );
 
-// Team
+// Team & HR
 const TeamMembers = Loadable(
-  lazy(() => import("@/pages/Admin/Team/TeamMembers/TeamMembers")),
+  lazy(() => import("@/pages/Team/TeamMembers/TeamMembers")),
+  AdminSkeleton
+);
+const Leaves = Loadable(
+  lazy(() => import("@/pages/Team/Leaves/Leaves")),
   AdminSkeleton
 );
 const TimeSheets = Loadable(
-  lazy(() => import("@/pages/Admin/Team/TimeSheets/TimeSheets")),
+  lazy(() => import("@/pages/Team/TimeSheets/TimeSheets")),
   AdminSkeleton
 );
 
 // Tasks, Leads & Reports
 const Tasks = Loadable(
-  lazy(() => import("@/pages/Admin/Tasks/Tasks")),
+  lazy(() => import("@/pages/Tasks/Tasks")),
   AdminSkeleton
 );
 const Leads = Loadable(
-  lazy(() => import("@/pages/Admin/Leads/Leads")),
+  lazy(() => import("@/pages/Leads/Leads")),
   AdminSkeleton
 );
 const Reports = Loadable(
-  lazy(() => import("@/pages/Admin/Reports/Reports")),
+  lazy(() => import("@/pages/Reports/Reports")),
   AdminSkeleton
 );
 
@@ -236,13 +247,20 @@ export const adminRoutes = [
         ],
       },
       {
+        icon: <Crown />,
+        name: "Admins",
+        path: "admins",
+        element: <Admins />,
+      },
+      {
         icon: <Users />,
-        name: "Team",
+        name: "HR & Team",
         path: "team",
         element: <Outlet />,
         children: [
           { index: true, element: <Navigate to="members" replace /> },
           { name: "Team Members", path: "members", element: <TeamMembers /> },
+          { name: "Leave Requests", path: "leaves", element: <Leaves /> },
           { name: "Time Sheets", path: "timesheets", element: <TimeSheets /> },
         ],
       },

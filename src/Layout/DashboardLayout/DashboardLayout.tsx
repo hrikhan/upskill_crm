@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { canUserAccessMenuItem } from "@/utils/permissionMapping";
+import Unauthorized from "@/common/Unauthorized";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Breadcrumbs from "./Breadcrumbs";
@@ -7,13 +11,12 @@ import { adminRoutes } from "@/routes/AdminRoutes";
 import { menuGenerator } from "@/utils/Generator/MenuGenerator";
 
 const routeDescriptions: Record<string, string> = {
-  "Overview": "Welcome back to your reseller dashboard.",
-  "Dynamic Table": "Manage database records using a powerful dynamic table.",
-  "Dynamic Form": "Build and submit validation-ready dynamic forms.",
-  "Employees": "Manage staff records, roles, and profiles.",
-  "Marketing": "Monitor campaigns, traffic growth, and outreach stats.",
-  "System Settings": "Configure system settings, integrations, and preferences.",
-  "Help & Support": "Access documentation and raise customer support tickets.",
+  "Overview": "Operations, payments, and leads summary.",
+  "Team Members": "Manage company employees and permissions.",
+  "Leave Requests": "Employee leave applications and approvals.",
+  "Time Sheets": "Employee daily work logs and timesheets.",
+  "Invoices": "Billing, installments, and payment status.",
+  "Clients": "Company accounts and GPS fleet records.",
 };
 
 interface DashboardLayoutProps {
@@ -25,6 +28,7 @@ const DashboardLayout = ({
   config = adminRoutes,
   basePath = "/admin",
 }: DashboardLayoutProps) => {
+  const user = useSelector((state: RootState) => state.auth.user);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
 
@@ -52,7 +56,7 @@ const DashboardLayout = ({
   const title = activeItem ? activeItem.label : "Overview";
   const description = activeItem && routeDescriptions[activeItem.label]
     ? routeDescriptions[activeItem.label]
-    : "Welcome back to your reseller dashboard.";
+    : "";
 
   return (
     <div className="flex h-screen overflow-hidden bg-layout-bg">
@@ -72,19 +76,23 @@ const DashboardLayout = ({
         />
       )}
 
-      {/* 2. Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        <Header 
-          title={title} 
-          description={description} 
-          onMenuClick={() => setIsMobileOpen(true)}
-          breadcrumbs={<Breadcrumbs config={config} basePath={basePath} className="mb-0 px-0" />}
-        />
+        {/* 2. Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+          <Header 
+            title={title} 
+            description={description} 
+            onMenuClick={() => setIsMobileOpen(true)}
+            breadcrumbs={<Breadcrumbs config={config} basePath={basePath} className="mb-0 px-0" />}
+          />
 
-        <main className="flex-1 p-4 bg-layout-bg">
-          <Outlet />
-        </main>
-      </div>
+          <main className="flex-1 p-4 bg-layout-bg">
+            {canUserAccessMenuItem(user, location.pathname) ? (
+              <Outlet />
+            ) : (
+              <Unauthorized />
+            )}
+          </main>
+        </div>
     </div>
   );
 };

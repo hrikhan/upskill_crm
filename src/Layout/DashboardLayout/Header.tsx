@@ -12,8 +12,22 @@ import {
   Activity,
   Power,
   ChevronRight,
+  AlarmClock,
+  Clock,
+  Calendar,
+  MessageSquare,
+  PlusCircle,
+  Globe,
+  Crown,
+  ShieldCheck,
+  Briefcase,
+  CreditCard,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "@/store/store";
+import { logout } from "@/store/features/AuthSlice/authSlice";
+import { toast } from "sonner";
 import { ThemeToggle } from "@/common/ThemeToggle";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +85,8 @@ const initialNotifications: NotificationItem[] = [
 ];
 
 const Header = ({ title, description, onMenuClick, breadcrumbs }: HeaderProps) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -284,47 +300,71 @@ const Header = ({ title, description, onMenuClick, breadcrumbs }: HeaderProps) =
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          <div className="h-6 w-[1px] bg-border"></div>
+          <div className="h-6 w-[1px] bg-border hidden sm:block"></div>
 
           {/* User Profile */}
           <div className="static sm:relative flex items-center h-full" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-10 h-10 rounded-xl overflow-hidden border border-border transition-all focus:outline-none cursor-pointer flex items-center justify-center hover:ring-2 hover:ring-blue-500/20 bg-primary-background"
+              className="flex items-center gap-2.5 p-1 rounded-xl transition-all focus:outline-none cursor-pointer hover:bg-light-background"
             >
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"
-                alt="Alex"
-                className="w-full h-full object-cover"
-              />
+              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-border flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                {user?.role === "super_admin" ? (
+                  <Crown className="w-5 h-5 text-amber-500" />
+                ) : user?.role === "admin" ? (
+                  <ShieldCheck className="w-5 h-5 text-blue-500" />
+                ) : (
+                  <Briefcase className="w-5 h-5 text-emerald-500" />
+                )}
+              </div>
+              <div className="text-left hidden sm:flex flex-col leading-tight pr-1">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                  {user?.role === "super_admin"
+                    ? "👑 Super Admin"
+                    : user?.role === "admin"
+                    ? "👔 Admin"
+                    : "💼 Staff"}
+                </span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[140px]">
+                  {user?.name || "Admin"}
+                </span>
+              </div>
             </button>
 
-            {/* Dropdown Menu - Light Theme Aesthetic matching Next.js */}
+            {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div className="absolute left-0 right-0 sm:left-auto sm:-right-2 top-full mt-2 sm:mt-8 w-auto sm:w-72 bg-primary-background rounded-lg border border-border surface overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute left-0 right-0 sm:left-auto sm:-right-2 top-full mt-2 sm:mt-8 w-auto sm:w-80 bg-primary-background rounded-xl border border-border surface overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200 shadow-2xl">
                 {/* Header */}
                 <div className="p-4 bg-light-background border-b border-border">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-primary-background border border-border">
-                      <img 
-                        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80" 
-                        alt="Alex" 
-                        className="w-full h-full object-cover" 
-                      />
+                    <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-border flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                      {user?.role === "super_admin" ? (
+                        <Crown className="w-6 h-6 text-amber-500" />
+                      ) : user?.role === "admin" ? (
+                        <ShieldCheck className="w-6 h-6 text-blue-500" />
+                      ) : (
+                        <Briefcase className="w-6 h-6 text-emerald-500" />
+                      )}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-semibold text-primary-text truncate">Alex</span>
-                      <span className="text-xs text-secondary-text truncate">alex@example.com</span>
+                      <span className="text-sm font-bold text-primary-text truncate">
+                        {user?.name || "User"}
+                      </span>
+                      <span className="text-xs text-secondary-text truncate">
+                        {user?.email || "user@upskillcrm.com"}
+                      </span>
+                      <span className="text-[10px] font-semibold text-primary-brand mt-0.5 capitalize">
+                        {user?.designation || user?.role}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Links */}
+                {/* Quick Navigation Links */}
                 <div className="p-2 space-y-0.5">
-                  <DropdownLink to="/admin" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsDropdownOpen(false)} iconColor="text-blue-500" bgColor="bg-blue-500/10" />
-                  <DropdownLink to="/admin/profile" icon={User} label="My Profile" onClick={() => setIsDropdownOpen(false)} iconColor="text-violet-500" bgColor="bg-violet-500/10" />
+                  <DropdownLink to="/admin/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsDropdownOpen(false)} iconColor="text-blue-500" bgColor="bg-blue-500/10" />
+                  <DropdownLink to="/admin/team/members" icon={User} label="Manage Staff & RBAC" onClick={() => setIsDropdownOpen(false)} iconColor="text-violet-500" bgColor="bg-violet-500/10" />
                   <DropdownLink to="/admin/settings" icon={Settings} label="Settings" onClick={() => setIsDropdownOpen(false)} iconColor="text-amber-500" bgColor="bg-amber-500/10" />
-                  <DropdownLink to="/admin/activity-log" icon={Activity} label="Activity Log" onClick={() => setIsDropdownOpen(false)} iconColor="text-emerald-500" bgColor="bg-emerald-500/10" />
                 </div>
 
                 {/* Footer / Logout */}
@@ -332,7 +372,9 @@ const Header = ({ title, description, onMenuClick, breadcrumbs }: HeaderProps) =
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      window.location.href = "/";
+                      dispatch(logout());
+                      toast.info("Logged out successfully");
+                      window.location.href = "/login";
                     }}
                     className="flex items-center gap-3 w-full px-3 py-2 text-red-600 hover:bg-red-500/10 rounded-lg transition-all duration-200 group cursor-pointer"
                   >
