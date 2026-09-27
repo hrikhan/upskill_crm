@@ -1,7 +1,0 @@
-import WorkInProgress from "@/common/WorkInProgress";
-
-const Support = () => {
-  return <WorkInProgress title="WORK IN PROGRESS" />;
-};
-
-export default Support;

@@ -13,6 +13,7 @@ This directory contains modular skill files for AI agents working on this projec
 | Form Implementation | [form-implementation.md](./skills/form-implementation.md) | Building forms with React Hook Form and Zod |
 | Routing and Pages | [routing-and-pages.md](./skills/routing-and-pages.md) | Route configuration and page structure |
 | State Management | [state-management.md](./skills/state-management.md) | Redux Toolkit, RTK Query, cache patterns |
+| Backend Implementation | [backend-implementation.md](./skills/backend-implementation.md) | NestJS, Prisma ORM, PostgreSQL schema, RBAC guards & API endpoints |
 
 ---
 

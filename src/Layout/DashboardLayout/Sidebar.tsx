@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, User, Crown, ShieldCheck } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "@/store/store";
+import { logout } from "@/store/features/AuthSlice/authSlice";
+import { canUserAccessMenuItem } from "@/utils/permissionMapping";
 import { adminRoutes } from "@/routes/AdminRoutes";
 import { menuGenerator, MenuItem } from "@/utils/Generator/MenuGenerator";
 import { Location } from "react-router-dom";
@@ -132,7 +136,24 @@ const Sidebar = ({
   config = adminRoutes,
   basePath = "/admin",
 }: SidebarProps) => {
-  const menu = menuGenerator(config, basePath);
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const rawMenu = menuGenerator(config, basePath);
+
+  // Dynamically filter sidebar items based on Super Admin / Admin / Staff permissions
+  const menu = rawMenu
+    .filter((item) => canUserAccessMenuItem(user, item.label || item.path || ""))
+    .map((item) => {
+      if (item.children) {
+        return {
+          ...item,
+          children: item.children.filter((child) =>
+            canUserAccessMenuItem(user, child.label || child.path || "")
+          ),
+        };
+      }
+      return item;
+    });
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -270,34 +291,57 @@ const Sidebar = ({
       </nav>
 
       {/* User Profile Card at Bottom */}
-      <div className="p-4 border-t border-border mt-auto shrink-0">
+      <div className="p-3 border-t border-border mt-auto shrink-0">
         {showCollapsed ? (
-          <div className="flex flex-col items-center gap-4">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"
-              alt="User Avatar"
-              className="w-12 h-12 rounded-xl border border-border object-cover"
-            />
-            <button className="text-muted-blue hover:text-red-500 transition-colors cursor-pointer">
-              <LogOut className="w-5 h-5" />
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-border flex items-center justify-center text-slate-600 dark:text-slate-300">
+              {user?.role === "super_admin" ? (
+                <Crown className="w-5 h-5 text-amber-500" />
+              ) : user?.role === "admin" ? (
+                <ShieldCheck className="w-5 h-5 text-sky-500" />
+              ) : (
+                <User className="w-5 h-5" />
+              )}
+            </div>
+            <button
+              onClick={() => {
+                dispatch(logout());
+                window.location.href = "/login";
+              }}
+              title="Sign Out"
+              className="text-muted-blue hover:text-red-500 transition-colors cursor-pointer p-1"
+            >
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-between p-3 border border-border rounded-xl bg-primary-background">
-            <div className="flex items-center gap-3">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"
-                alt="User Avatar"
-                className="w-12 h-12 rounded-xl border border-border object-cover"
-              />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-primary-text leading-tight">Alex</span>
-                <span className="text-xs text-muted-blue leading-tight mt-0.5">Manager Admin</span>
+          <div className="flex items-center justify-between p-2.5 border border-border rounded-xl bg-card surface shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-border flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                {user?.role === "super_admin" ? (
+                  <Crown className="w-4.5 h-4.5 text-amber-500" />
+                ) : user?.role === "admin" ? (
+                  <ShieldCheck className="w-4.5 h-4.5 text-sky-500" />
+                ) : (
+                  <User className="w-4.5 h-4.5" />
+                )}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-bold text-primary-text leading-tight truncate">
+                  {user?.name || "User"}
+                </span>
+                <span className="text-[10px] text-muted-blue leading-tight truncate mt-0.5 capitalize">
+                  {user?.designation || (user?.role === "super_admin" ? "Super Admin" : user?.role === "admin" ? "Operations Admin" : "Staff")}
+                </span>
               </div>
             </div>
             <button 
-              onClick={() => window.location.href = "/"}
-              className="text-muted-blue hover:text-red-500 transition-colors cursor-pointer"
+              onClick={() => {
+                dispatch(logout());
+                window.location.href = "/login";
+              }}
+              title="Sign Out"
+              className="text-muted-blue hover:text-red-500 transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 shrink-0"
             >
               <LogOut className="w-4 h-4" />
             </button>

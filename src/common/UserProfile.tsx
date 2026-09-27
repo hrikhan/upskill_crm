@@ -20,9 +20,9 @@ export default function UserProfile({ className }: UserProfileProps) {
   const { user } = useAppSelector((state) => state.auth);
 
   const demoUser = {
-    name: "Alex",
-    email: "alex@example.com",
-    role: "Manager Admin",
+    name: "Hridoy",
+    email: "hridoy@upskill.com",
+    role: "Admin",
     profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
   };
 
