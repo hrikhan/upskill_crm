@@ -32,7 +32,7 @@ You can log in directly using the following credentials or use the 1-click role 
 
 | Role | Email | Password | Scope & Primary Focus |
 |---|---|---|---|
-| **👑 Super Admin** | `superadmin@upskillcrm.com` | `super123` | Upskill Consultancy (Full root access + Admins management `/admin/admins`) |
+| **👑 Super Admin** | `superadmin@upskillcrm.com` | `super123` | Upskill CRM (Full root access + Admins management `/admin/admins`) |
 | **🛡️ Admin** | `admin@upskillcrm.com` | `admin123` | Operational control + **Staff RBAC management** (`/admin/team/members`) |
 | **💼 Staff (Sales)** | `sales@upskillcrm.com` | `staff123` | Leads Pipeline, Clients, Proposals *(Billing, Invoices & Reports hidden)* |
 | **💳 Staff (Billing)** | `billing@upskillcrm.com` | `staff123` | Invoices, Monthly Subscriptions, Payments *(Leads hidden)* |

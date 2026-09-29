@@ -19,7 +19,7 @@ interface AuthState {
 // Default initial state: Super Admin (Root Master)
 const initialUser: AuthUser = {
   userId: "user-super-1",
-  name: "Upskill Consultancy",
+  name: "Upskill CRM",
   email: "superadmin@upskillcrm.com",
   phone: "01700000000",
   role: "super_admin",
@@ -52,7 +52,7 @@ const authSlice = createSlice({
         case "super_admin":
           state.user = {
             userId: "user-super-1",
-            name: "Upskill Consultancy",
+            name: "Upskill CRM",
             email: "superadmin@upskillcrm.com",
             phone: "01700000000",
             role: "super_admin",

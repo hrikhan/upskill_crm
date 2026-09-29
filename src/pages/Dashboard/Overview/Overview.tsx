@@ -5,6 +5,8 @@ import { IncomeExpenseChart } from "./_components/IncomeExpenseChart";
 import { LeadsDonutChart } from "./_components/LeadsDonutChart";
 import { DashboardFilters } from "./_components/DashboardFilters";
 import { RecentActivitySection, InvoiceItem, LeadItem } from "./_components/RecentActivitySection";
+import { KpiCalculationModal } from "./_components/KpiCalculationModal";
+import { getKpiCalculationDetails } from "./kpiCalculationData";
 import {
   SlidersHorizontal,
   RotateCcw,
@@ -15,6 +17,7 @@ import {
   CheckCircle2,
   FileText,
   ArrowRight,
+  UserCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -145,6 +148,19 @@ const initialLeads: LeadItem[] = [
 export default function OverviewPage() {
   const { hasPermission, isAdmin, isSuperAdmin, user } = usePermissions();
 
+  const isExecutive = isSuperAdmin || isAdmin;
+  const userCleanName = useMemo(() => {
+    if (!user?.name) return "";
+    return user.name.split(" (")[0].trim();
+  }, [user?.name]);
+
+  const staffScope = useMemo(() => {
+    return {
+      isStaff: !isExecutive,
+      staffName: userCleanName || "Staff Member",
+    };
+  }, [isExecutive, userCleanName]);
+
   const canViewSales = isSuperAdmin || isAdmin || hasPermission("sales");
   const canViewLeads = isSuperAdmin || isAdmin || hasPermission("leads");
   const canViewHR = isSuperAdmin || isAdmin || hasPermission("team");
@@ -156,9 +172,12 @@ export default function OverviewPage() {
   const [selectedAgent, setSelectedAgent] = useState("All Sales Reps");
   const [selectedSource, setSelectedSource] = useState("All Sources");
 
+  // KPI Calculation Modal State
+  const [selectedKpiCardId, setSelectedKpiCardId] = useState<string | null>(null);
+
   const hasActiveFilters =
     selectedStage !== "All Stages" ||
-    selectedAgent !== "All Sales Reps" ||
+    (isExecutive && selectedAgent !== "All Sales Reps") ||
     selectedSource !== "All Sources";
 
   const handleResetFilters = () => {
@@ -167,20 +186,44 @@ export default function OverviewPage() {
     setSelectedSource("All Sources");
   };
 
-  // Filtered Invoices
+  // Filtered Invoices (Admin/Executive has total calculation; Staff has only their specific revenue/invoices)
   const filteredInvoices = useMemo(() => {
     return initialInvoices.filter((inv) => {
+      // Row-Level Security for Staff
+      if (!isExecutive) {
+        const isOwner =
+          inv.salesRep.toLowerCase().includes(userCleanName.toLowerCase()) ||
+          userCleanName.toLowerCase().includes(inv.salesRep.toLowerCase());
+        const matchSource =
+          selectedSource === "All Sources" || inv.source === selectedSource;
+        return isOwner && matchSource;
+      }
+
+      // Executive / Admin organization total
       const matchAgent =
         selectedAgent === "All Sales Reps" || inv.salesRep === selectedAgent;
       const matchSource =
         selectedSource === "All Sources" || inv.source === selectedSource;
       return matchAgent && matchSource;
     });
-  }, [selectedAgent, selectedSource]);
+  }, [isExecutive, selectedAgent, selectedSource, userCleanName]);
 
-  // Filtered Leads
+  // Filtered Leads (Admin/Executive has total calculation; Staff has only their assigned leads)
   const filteredLeads = useMemo(() => {
     return initialLeads.filter((lead) => {
+      // Row-Level Security for Staff
+      if (!isExecutive) {
+        const isOwner =
+          lead.salesRep.toLowerCase().includes(userCleanName.toLowerCase()) ||
+          userCleanName.toLowerCase().includes(lead.salesRep.toLowerCase());
+        const matchStage =
+          selectedStage === "All Stages" || lead.stage === selectedStage;
+        const matchSource =
+          selectedSource === "All Sources" || lead.source === selectedSource;
+        return isOwner && matchStage && matchSource;
+      }
+
+      // Executive / Admin organization total
       const matchStage =
         selectedStage === "All Stages" || lead.stage === selectedStage;
       const matchAgent =
@@ -189,7 +232,7 @@ export default function OverviewPage() {
         selectedSource === "All Sources" || lead.source === selectedSource;
       return matchStage && matchAgent && matchSource;
     });
-  }, [selectedStage, selectedAgent, selectedSource]);
+  }, [isExecutive, selectedStage, selectedAgent, selectedSource, userCleanName]);
 
   // Computed KPI Metrics from active filter
   const kpiMetrics = useMemo(() => {
@@ -296,14 +339,43 @@ export default function OverviewPage() {
     []
   );
 
+  // Active KPI Calculation and Schedule Data for Modal
+  const activeKpiCalculationData = useMemo(() => {
+    if (!selectedKpiCardId) return null;
+    return getKpiCalculationDetails(
+      selectedKpiCardId,
+      filteredInvoices,
+      filteredLeads,
+      staffScope
+    );
+  }, [selectedKpiCardId, filteredInvoices, filteredLeads, staffScope]);
+
   return (
     <div className="space-y-6">
       {/* Top Header & Filter Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-primary-text">
-            Dashboard
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight text-primary-text">
+              Dashboard
+            </h1>
+            <span
+              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                !isExecutive
+                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800"
+                  : "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border-sky-300 dark:border-sky-800"
+              }`}
+            >
+              {!isExecutive
+                ? `Personal View (${userCleanName})`
+                : "Executive Enterprise View"}
+            </span>
+          </div>
+          <p className="text-xs text-secondary-text mt-0.5">
+            {!isExecutive
+              ? `Displaying your individual revenue, assigned leads, and performance results.`
+              : `Consolidated organization-wide performance across all 12 staff accounts.`}
+          </p>
         </div>
 
         {(canViewSales || canViewLeads) && (
@@ -334,6 +406,26 @@ export default function OverviewPage() {
           </div>
         )}
       </div>
+
+      {/* Staff Personal Scope Notice Banner */}
+      {!isExecutive && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl text-xs text-amber-900 dark:text-amber-200 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0">
+              <UserCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold">Personal Performance Scope:</span>{" "}
+              <span>
+                Displaying only your specific revenue, leads, and pipeline results (<strong>{userCleanName}</strong>). Enterprise-wide organization totals are restricted to Admins &amp; Sales Executives.
+              </span>
+            </div>
+          </div>
+          <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-md bg-amber-200/70 dark:bg-amber-900 text-amber-900 dark:text-amber-200 shrink-0">
+            Personal Result
+          </span>
+        </div>
+      )}
 
       {/* Active Filter Notification Banner */}
       {hasActiveFilters && (canViewSales || canViewLeads) && (
@@ -385,6 +477,7 @@ export default function OverviewPage() {
               source={selectedSource}
               onSourceChange={setSelectedSource}
               showStage={canViewLeads}
+              staffScope={staffScope}
             />
           </div>
         </AnimatedContainer>
@@ -397,6 +490,7 @@ export default function OverviewPage() {
           paymentsMonth={kpiMetrics.paymentsMonth}
           invoicesDue={kpiMetrics.invoicesDue}
           invoicesOverdue={kpiMetrics.invoicesOverdue}
+          onCardClick={setSelectedKpiCardId}
           customCards={
             !canViewSales && canViewLeads
               ? salesKpiCards
@@ -487,6 +581,13 @@ export default function OverviewPage() {
           />
         </AnimatedContainer>
       )}
+
+      {/* KPI Calculation Formula & Schedule Details Modal */}
+      <KpiCalculationModal
+        isOpen={Boolean(selectedKpiCardId)}
+        onClose={() => setSelectedKpiCardId(null)}
+        data={activeKpiCalculationData}
+      />
     </div>
   );
 }
