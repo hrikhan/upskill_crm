@@ -59,9 +59,11 @@ backend/
 │       ├── subscriptions/         # Monthly recurring GPS cloud tracking fees
 │       ├── tasks/                 # Field technician installation & repair dispatch
 │       ├── support/               # Technical support tickets & device RMA
-│       ├── contracts/             # Service contracts & fleet AMCs
-│       ├── projects/              # Fleet deployment rollout milestones
+│       ├── proposals/             # Quotations, proposal items & standardized proposal templates
+│       ├── contracts/             # Service contracts, fleet AMCs & standardized contract templates
+│       ├── projects/              # Fleet deployment rollouts & standardized installation templates
 │       ├── reports/               # Aggregated analytics & cash flow queries
+│       ├── dashboard/             # Live KPI metrics, calculation formulas & cron recalculator
 │       └── portal/                # Authenticated customer self-service fleet portal
 ```
 
@@ -74,3 +76,6 @@ backend/
 - [ ] Strict DTO validation with `class-validator` and `ValidationPipe({ whitelist: true })`.
 - [ ] No hardcoded passwords; passwords hashed with `bcrypt` (salt rounds 12).
 - [ ] Endpoints documented with Swagger annotations (`@ApiTags()`, `@ApiOperation()`).
+- [ ] Dashboard KPI engine implements `/api/v1/dashboard/kpi-details/:metricId` with explicit formula metadata, cron schedules (`0 0 * * *` BST), and Redis cache invalidation on payment/lead mutations.
+- [ ] Enforce Row-Level Security (RLS) in Dashboard and Analytics: Staff members (`role === 'STAFF'`) only see their personal revenue and assigned leads (`where: { salesRepId: user.id }`), whereas Super Admin and Admins receive enterprise-wide totals.
+- [ ] Track User KPIs via `StaffTarget` and `StaffKpiSnapshot` entities: Quota achievement rate, lead conversion efficiency, average deal size, delinquent debt balance, and attendance compliance.
