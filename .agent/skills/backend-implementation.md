@@ -24,7 +24,7 @@ This skill defines the technical standards, folder structure, Prisma ORM pattern
    - `SUPER_ADMIN`: Root owner. Exclusive management of Admins (`/api/v1/admins`).
    - `ADMIN`: Operational management. Creates and manages Staff (`/api/v1/team/members`) and grants/revokes module permissions.
    - `STAFF`: Strict RBAC. Operates only on modules granted in their `permissions` JSON.
-   - `CLIENT`: Customer portal access (`/api/v1/portal/*`).
+   - *Note*: Customers/Clients are strictly commercial database records managed by internal staff; there is NO external client portal.
 3. **Streamlined Invoicing & Partial Payment Recalculation**:
    - When a payment is recorded against an invoice, atomically recalculate:
      - `paidAmount = SUM(payments.amount)`
@@ -63,8 +63,7 @@ backend/
 │       ├── contracts/             # Service contracts, fleet AMCs & standardized contract templates
 │       ├── projects/              # Fleet deployment rollouts & standardized installation templates
 │       ├── reports/               # Aggregated analytics & cash flow queries
-│       ├── dashboard/             # Live KPI metrics, calculation formulas & cron recalculator
-│       └── portal/                # Authenticated customer self-service fleet portal
+│       └── dashboard/             # Live KPI metrics, calculation formulas & cron recalculator
 ```
 
 ---
