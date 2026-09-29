@@ -36,7 +36,7 @@ const demoAccounts: DemoAccount[] = [
     id: "super_admin",
     preset: "super_admin",
     roleTitle: "Super Admin",
-    name: "Upskill Consultancy",
+    name: "Upskill CRM",
     email: "superadmin@upskillcrm.com",
     pass: "super123",
     icon: <Crown className="w-4 h-4 text-amber-500" />,
@@ -160,7 +160,7 @@ export default function LoginPage() {
           </div>
           <div>
             <span className="text-xl font-bold tracking-tight text-white block leading-none">
-              UPSKILL <span className="text-sky-400">CONSULTANCY</span>
+              UPSKILL <span className="text-sky-400">CRM</span>
             </span>
             <span className="text-xs text-slate-300 font-medium mt-1 block">
               GPS Sales, Lead Pipeline & Invoicing CRM
@@ -341,7 +341,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-xs text-secondary-text text-center lg:text-left pt-4">
-          © {new Date().getFullYear()} Upskill Consultancy • GPS Sales & Invoicing CRM
+          © {new Date().getFullYear()} Upskill CRM • GPS Sales & Invoicing CRM
         </div>
       </div>
     </div>
