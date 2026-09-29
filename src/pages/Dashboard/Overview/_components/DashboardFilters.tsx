@@ -15,6 +15,7 @@ export interface DashboardFiltersProps {
   source?: string;
   onSourceChange?: (value: string) => void;
   showStage?: boolean;
+  staffScope?: { isStaff: boolean; staffName?: string };
 }
 
 export function DashboardFilters({
@@ -30,6 +31,7 @@ export function DashboardFilters({
   source: propSource,
   onSourceChange: propOnSourceChange,
   showStage = true,
+  staffScope,
 }: DashboardFiltersProps) {
   // Local state fallbacks (uncontrolled mode)
   const [localStartDate, setLocalStartDate] = useState(new Date("2026-06-01"));
@@ -119,16 +121,22 @@ export function DashboardFilters({
     {
       key: "agent",
       icon: UserCheck,
-      title: "All Sales Reps",
-      options: [
-        "All Sales Reps",
-        "Hridoy (Admin)",
-        "Sarah Jenkins",
-        "Michael Chang",
-        "David Miller",
-      ],
-      value: agent,
-      onChange: handleAgentChange,
+      title: staffScope?.isStaff
+        ? `${staffScope.staffName || "Your Account"} (Personal View)`
+        : "All Sales Reps",
+      options: staffScope?.isStaff
+        ? [`${staffScope.staffName || "Your Account"} (Personal View)`]
+        : [
+            "All Sales Reps",
+            "Hridoy (Admin)",
+            "Sarah Jenkins",
+            "Michael Chang",
+            "David Miller",
+          ],
+      value: staffScope?.isStaff
+        ? `${staffScope.staffName || "Your Account"} (Personal View)`
+        : agent,
+      onChange: staffScope?.isStaff ? () => {} : handleAgentChange,
     },
     {
       key: "source",

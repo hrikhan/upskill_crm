@@ -188,7 +188,15 @@ The Dashboard (`/admin/dashboard` in `src/pages/Dashboard/Overview/Overview.tsx`
 ### Dashboard Polish & Cleanliness:
 - Garbage demo text and irrelevant icons completely removed from the header.
 - Clean header with clear "Dashboard" title and responsive period/sales filters.
-- Real-time filter toolbar (Stage, Sales Rep, Source) with 1-click filter reset.
+- **Role-Based Row-Level Scoping (Enterprise Total vs. Staff Personal Result)**:
+  - **Super Admin & Admin / Operations Director**: Unrestricted master view with organization-wide calculations across all 12 staff members, with optional drilldown by individual sales rep.
+  - **Staff Members**: Strictly restricted to their own personal revenue, issued invoices, and assigned leads (`where: { salesRepId: currentUser.id }`). Company-wide totals, peer earnings, and other reps' customer ledgers are hidden for corporate privacy.
+- **Interactive KPI Calculation & Schedule Audit Modal (`KpiCalculationModal.tsx`)**:
+  - Clicking any dashboard KPI card opens an in-depth audit modal showing:
+    1. **How It's Calculated**: Exact mathematical formula, plain-English explanation, active variables, and SQL database query preview.
+    2. **When It's Calculated**: Recalculation schedule, frequency (Real-time vs Daily Cron), trigger event timeline, next run timestamp, and Redis caching invalidation policy.
+    3. **Live Contributing Data Breakdown**: Line-item audit list of specific invoices, leads, or staff members that comprise the active calculated value based on current filters.
+    4. **Direct Navigation**: Deep links directly to the underlying module (e.g. `/admin/sales/invoices`, `/admin/leads`, `/admin/team`).
 
 ---
 
@@ -220,6 +228,10 @@ The Dashboard (`/admin/dashboard` in `src/pages/Dashboard/Overview/Overview.tsx`
 - [x] Customer Directory & Client Users directory with linked fleet details.
 - [x] Dynamic Dashboard with permission-based adaptive views for Sales, Billing, HR, and Admin.
 - [x] Real-time Dashboard filters (Sales Rep, Stage, Source) with live recalculation of KPIs, charts, and tables.
+- [x] Interactive KPI card calculation modal explaining mathematical formulas, schedule/frequency, and contributing line items.
+- [x] Standardized Fleet Project Templates module (`/admin/projects/templates`) with multi-phase installation blueprints, hardware specifications, and 1-click project instantiation.
+- [x] Standardized Service Contract Templates module (`/admin/contracts/templates`) with SLA models, legal clauses, and 1-click contract generation.
+- [x] Standardized Telematics Proposal Templates module (`/admin/proposals/templates`) with turnkey hardware bundles, sensor calibration tiers, dynamic fleet unit pricing calculator, and 1-click proposal generation.
 - [x] Type checking (`npx tsc --noEmit`) and production bundling (`npm run build`) passing with zero errors.
 
 ---
@@ -246,7 +258,7 @@ The Dashboard (`/admin/dashboard` in `src/pages/Dashboard/Overview/Overview.tsx`
 | **16** | Customers: Client Users | Authorized contact persons & portal login credentials (`/admin/customers/users`) | ✅ Completed |
 | **17** | Dashboard: Real-time Filters | Sales Rep, Lead Stage, and Source filter toolbar with active pill banner | ✅ Completed |
 | **18** | Dashboard: RBAC Staff Views | Adaptive layouts for Sales (Leads only), Billing (Finance only), HR, Admin | ✅ Completed |
-| **19** | Proposals & Quotes Module | Unified quotation builder with 1-click invoice conversion (`/admin/proposals`) | ✅ Completed |
+| **19** | Proposals & Proposal Templates | Unified quotation builder with 1-click invoice conversion (`/admin/proposals/proposals`), and standardized quotation packages (`/admin/proposals/templates`) | ✅ Completed |
 | **20** | Sales: Invoices & Billing Engine | Fully implemented line-item invoice builder, partial payments (e.g. 2,000 BDT), balance due recalculation & printable preview (`/admin/sales/invoices`) | ✅ Completed |
 | **21** | Sales: Monthly Subscriptions | Recurring GPS monthly software tracking subscriptions, MRR stats, fleet renewals & billing (`/admin/sales/subscriptions`) | ✅ Completed |
 | **22** | Sales: Payments Ledger | Payment receipts transaction ledger, bKash/Bank/Cash channels, and printable receipt (`/admin/sales/payments`) | ✅ Completed |
@@ -254,8 +266,8 @@ The Dashboard (`/admin/dashboard` in `src/pages/Dashboard/Overview/Overview.tsx`
 | **24** | Customer Portal View | Customer self-service vehicle & invoice portal with live GPS status (`/user/overview`) | ✅ Completed |
 | **25** | Field Installation & Maintenance Tasks | Technician dispatch for GPS wiring, fuel sensor calibration, SIM swap (`/admin/tasks`) | ✅ Completed |
 | **26** | Customer Support & Device RMA | Tickets, device offline alarms, remote relay troubleshooting (`/admin/support/tickets`) | ✅ Completed |
-| **27** | Service Contracts & Fleet AMCs | Annual maintenance contracts, SLA tracking, and renewal alerts (`/admin/contracts`) | ✅ Completed |
-| **28** | Fleet Deployment Projects | Enterprise fleet onboarding rollouts, multi-vehicle progress tracking (`/admin/projects`) | ✅ Completed |
+| **27** | Service Contracts & Templates | Annual maintenance contracts, SLA tracking, standardized contract templates & legal clauses (`/admin/contracts`, `/admin/contracts/templates`) | ✅ Completed |
+| **28** | Fleet Deployment Projects & Templates | Enterprise fleet onboarding rollouts (`/admin/projects`), standardized multi-phase installation blueprints & 1-click project instantiation (`/admin/projects/templates`) | ✅ Completed |
 | **29** | Executive Reports & Analytics | Financial trajectory charts, MRR growth, hardware model sales, CSV export (`/admin/reports`) | ✅ Completed |
 | **30** | System & Telematics Settings | Brand profile, bKash & Bank credentials, GPS server ping rates, billing defaults (`/admin/settings`) | ✅ Completed |
 | **31** | Production Build Verification | Zero TypeScript and bundling errors across all modules | ✅ Completed |

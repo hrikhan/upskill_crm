@@ -192,6 +192,8 @@ model User {
   timesheets      TimeSheet[]
   recordedPayments Payment[]         @relation("ReceivedByUser")
   auditLogs       AuditLog[]
+  staffTargets    StaffTarget[]
+  kpiSnapshots    StaffKpiSnapshot[]
 
   @@index([role, isActive])
 }
@@ -209,6 +211,45 @@ model StaffPermission {
 
   @@unique([userId, module])
   @@index([userId])
+}
+
+model StaffTarget {
+  id              String    @id @default(uuid())
+  staffId         String
+  month           Int       // 1 - 12
+  year            Int       // e.g. 2026
+  revenueTarget   Decimal   @db.Decimal(12, 2)
+  leadsWonTarget  Int       @default(5)
+  callsTarget     Int?      @default(50)
+  achievedRevenue Decimal   @default(0) @db.Decimal(12, 2)
+  achievedLeadsWon Int      @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  staff           User      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, month, year])
+  @@index([staffId, year, month])
+}
+
+model StaffKpiSnapshot {
+  id                 String    @id @default(uuid())
+  staffId            String
+  month              Int
+  year               Int
+  totalAssignedLeads Int       @default(0)
+  totalWonDeals      Int       @default(0)
+  conversionRate     Decimal   @default(0) @db.Decimal(5, 2) // e.g. 28.50%
+  totalRevenue       Decimal   @default(0) @db.Decimal(12, 2)
+  totalOverdueDebt   Decimal   @default(0) @db.Decimal(12, 2)
+  avgClosingDays     Decimal?  @db.Decimal(5, 1)
+  attendanceRate     Decimal   @default(0) @db.Decimal(5, 2)
+  createdAt          DateTime  @default(now())
+
+  staff              User      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, month, year])
+  @@index([staffId])
 }
 
 // ----------------------------------------------------
@@ -464,6 +505,242 @@ model Subscription {
 }
 
 // ----------------------------------------------------
+// FLEET DEPLOYMENT PROJECTS & TEMPLATES
+// ----------------------------------------------------
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+model FleetProject {
+  id                String         @id @default(uuid())
+  projectCode       String         @unique // e.g. "PRJ-2026-01"
+  projectName       String
+  clientId          String
+  contactPerson     String
+  totalVehicles     Int            @default(1)
+  installedVehicles Int            @default(0)
+  projectLeadId     String?
+  startDate         DateTime       @default(now())
+  deadline          DateTime
+  budget            Decimal        @db.Decimal(12, 2)
+  status            ProjectStatus  @default(PLANNING)
+  trackerModel      String
+  templateId        String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  client            Client         @relation(fields: [clientId], references: [id])
+  projectLead       User?          @relation("ProjectLead", fields: [projectLeadId], references: [id])
+  template          ProjectTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([status, clientId])
+}
+
+model ProjectTemplate {
+  id                      String                 @id @default(uuid())
+  templateCode            String                 @unique // e.g. "TPL-FLT-01"
+  name                    String
+  category                String                 // Commercial Haulers, Motorbike Delivery, etc.
+  description             String
+  targetVehiclesRange     String                 // e.g. "10 - 50 Vehicles"
+  defaultTrackerModel     String
+  estimatedDaysPerVehicle Decimal                @db.Decimal(4, 1)
+  estimatedTotalDays      Int
+  estimatedBudgetPerUnit  Decimal                @db.Decimal(10, 2)
+  isActive                Boolean                @default(true)
+  usageCount              Int                    @default(0)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+
+  phases                  ProjectTemplatePhase[]
+  spawnedProjects         FleetProject[]
+
+  @@index([category, isActive])
+}
+
+model ProjectTemplatePhase {
+  id             String                @id @default(uuid())
+  templateId     String
+  phaseNumber    Int
+  name           String
+  estimatedDays  Int
+  createdAt      DateTime              @default(now())
+
+  template       ProjectTemplate       @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  tasks          ProjectTemplateTask[]
+
+  @@index([templateId, phaseNumber])
+}
+
+model ProjectTemplateTask {
+  id             String                @id @default(uuid())
+  phaseId        String
+  title          String
+  roleRequired   String                // Lead Engineer, Field Wiring Tech, etc.
+  isMandatory    Boolean               @default(true)
+  estimatedHours Decimal               @db.Decimal(5, 1)
+  createdAt      DateTime              @default(now())
+
+  phase          ProjectTemplatePhase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+}
+
+// ----------------------------------------------------
+// SERVICE CONTRACTS & TEMPLATES
+// ----------------------------------------------------
+
+enum ContractType {
+  FLEET_AMC_ANNUAL
+  SLA_TELEMATICS_SERVICE
+  HARDWARE_LEASE_MAINTENANCE
+  CUSTOM_SLA
+}
+
+enum ContractStatus {
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  DRAFT
+  TERMINATED
+}
+
+enum BillingCycle {
+  MONTHLY_RECURRING
+  QUARTERLY
+  ANNUAL_ADVANCE
+}
+
+model ServiceContract {
+  id              String          @id @default(uuid())
+  contractNumber  String          @unique // e.g. "CTR-2026-041"
+  title           String
+  clientId        String
+  contactPerson   String
+  contractType    ContractType    @default(FLEET_AMC_ANNUAL)
+  unitsCovered    Int             @default(1)
+  contractValue   Decimal         @db.Decimal(12, 2)
+  startDate       DateTime
+  endDate         DateTime
+  autoRenew       Boolean         @default(true)
+  status          ContractStatus  @default(ACTIVE)
+  templateId      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  client          Client          @relation(fields: [clientId], references: [id])
+  template        ContractTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([status, clientId])
+}
+
+model ContractTemplate {
+  id                     String           @id @default(uuid())
+  templateCode           String           @unique // e.g. "TPL-AMC-01"
+  title                  String
+  contractType           ContractType     @default(FLEET_AMC_ANNUAL)
+  description            String
+  standardDurationMonths Int              @default(12)
+  standardBillingCycle   BillingCycle     @default(ANNUAL_ADVANCE)
+  baseRatePerUnitMonth   Decimal          @db.Decimal(10, 2)
+  slaResponseHours       Int              @default(8)
+  slaUptimeGuarantee     String           @default("99.5% Uptime")
+  isActive               Boolean          @default(true)
+  usageCount             Int              @default(0)
+  paymentTerms           String
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  clauses                ContractClause[]
+  spawnedContracts       ServiceContract[]
+
+  @@index([contractType, isActive])
+}
+
+model ContractClause {
+  id           String           @id @default(uuid())
+  templateId   String
+  clauseNumber String           // e.g. "1.0", "2.1"
+  heading      String
+  body         String           @db.Text
+  isMandatory  Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+
+  template     ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId, clauseNumber])
+}
+
+// ----------------------------------------------------
+// PROPOSAL / QUOTATION TEMPLATES
+// ----------------------------------------------------
+
+enum ProposalCategory {
+  ENTERPRISE_FLEET
+  COLD_CHAIN
+  FUEL_TELEMATICS
+  PLUG_AND_PLAY
+  HEAVY_ASSET
+  VIDEO_TELEMATICS
+}
+
+model ProposalTemplate {
+  id                      String                 @id @default(uuid())
+  templateCode            String                 @unique // e.g. "TPL-PROP-01"
+  title                   String
+  category                ProposalCategory       @default(ENTERPRISE_FLEET)
+  targetAudience          String
+  description             String                 @db.Text
+  validityDays            Int                    @default(30)
+  defaultPaymentTerms     String
+  standardDiscountPercent Decimal                @db.Decimal(5, 2) @default(10.00)
+  estimatedPerVehicleCost Decimal                @db.Decimal(12, 2)
+  recommendedFleetSize    String                 // e.g. "10 - 150 Vehicles"
+  turnaroundTime          String                 // e.g. "2-3 Business Days"
+  isActive                Boolean                @default(true)
+  usageCount              Int                    @default(0)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+
+  items                   ProposalTemplateItem[]
+  scopeOfWork             ProposalTemplateScope[]
+
+  @@index([category, isActive])
+}
+
+model ProposalTemplateItem {
+  id                        String           @id @default(uuid())
+  templateId                String
+  type                      String           // hardware, installation, subscription, accessory, service
+  name                      String
+  description               String           @db.Text
+  defaultUnitPrice          Decimal          @db.Decimal(10, 2)
+  defaultQuantityPerVehicle Int              @default(1)
+  isOptional                Boolean          @default(false)
+  createdAt                 DateTime         @default(now())
+
+  template                  ProposalTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId, type])
+}
+
+model ProposalTemplateScope {
+  id           String           @id @default(uuid())
+  templateId   String
+  phaseNumber  String           // e.g. "Phase 1"
+  title        String
+  deliverables Json             // Array of string deliverables
+  createdAt    DateTime         @default(now())
+
+  template     ProposalTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+}
+
+// ----------------------------------------------------
 // AUDIT & LOGGING
 // ----------------------------------------------------
 
@@ -586,7 +863,7 @@ async function main() {
     create: {
       email: 'superadmin@upskillcrm.com',
       passwordHash,
-      name: 'Upskill Consultancy',
+      name: 'Upskill CRM',
       role: UserRole.SUPER_ADMIN,
       designation: 'Platform Master / Owner',
       department: 'Executive',
@@ -805,74 +1082,409 @@ export class PaymentsService {
 
 ---
 
-## 📊 8. Dashboard Aggregation & Analytics Queries
+## 📊 8. Dashboard Aggregation & User KPI Performance Tracking Engine
 
-High-performance aggregation queries matching frontend KPI cards and charts:
+### 👥 8.1 Role-Based Row-Level Scoping: Enterprise Totals vs. Staff Personal Scoped Results
+
+The backend strictly enforces **Row-Level Security (RLS)** based on the authenticated user's role:
+- **👑 Super Admin & 🛡️ Admin / Sales Executive**:
+  - Unrestricted query scope by default.
+  - Can view **organization-wide totals** across all 12 staff accounts and company divisions.
+  - May optionally filter by a specific staff member (`?agentId=...` or `?agentName=...`) to audit individual performance.
+- **💼 Staff (Sales, Billing, HR)**:
+  - Query scope is **strictly locked** to `WHERE sales_rep_id = currentUser.id` (or `assigned_staff_id = currentUser.id`).
+  - Staff can **NEVER** view other sales representatives' private revenue, commissions, or customer invoices.
+  - Organization totals are withheld to protect corporate salary/commission privacy and prevent unauthorized data leakage.
 
 ```typescript
 // src/modules/dashboard/dashboard.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { InvoiceStatus, LeadStage } from '@prisma/client';
+import { InvoiceStatus, LeadStage, UserRole } from '@prisma/client';
+
+export interface AuthenticatedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface DashboardFilterDto {
+  agentId?: string;
+  stage?: string;
+  source?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
 
 @Injectable()
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async getExecutiveStats(filters?: { agent?: string; startDate?: Date; endDate?: Date }) {
-    const whereInvoice: any = {};
-    if (filters?.agent && filters.agent !== 'All Sales Reps') {
-      whereInvoice.salesRep = filters.agent;
+  /**
+   * Generates dashboard analytics with mandatory Role-Based Row-Level Scoping
+   */
+  async getDashboardStats(currentUser: AuthenticatedUser, filters?: DashboardFilterDto) {
+    const isExecutive = currentUser.role === UserRole.SUPER_ADMIN || currentUser.role === UserRole.ADMIN;
+
+    // 1. Enforce Row-Level Security for Invoices & Payments
+    const invoiceWhere: any = {};
+    const leadWhere: any = { isArchived: false };
+
+    if (!isExecutive) {
+      // Staff is strictly locked to their own ID
+      invoiceWhere.salesRepId = currentUser.id;
+      leadWhere.assignedStaffId = currentUser.id;
+    } else if (filters?.agentId && filters.agentId !== 'All Sales Reps') {
+      // Admin/Executive optionally inspecting an individual staff member
+      invoiceWhere.salesRepId = filters.agentId;
+      leadWhere.assignedStaffId = filters.agentId;
     }
 
-    // 1. Financial KPI Cards
-    const [paymentsToday, paymentsMonth, dueInvoices, overdueInvoices] = await Promise.all([
-      // Payments collected today
+    if (filters?.source && filters.source !== 'All Sources') {
+      invoiceWhere.source = filters.source;
+      leadWhere.source = filters.source;
+    }
+
+    if (filters?.stage && filters.stage !== 'All Stages') {
+      leadWhere.stage = filters.stage as LeadStage;
+    }
+
+    // 2. Compute Financial Aggregates
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+    const [paymentsToday, paymentsMonth, dueInvoices, overdueInvoices, leadsFunnel] = await Promise.all([
+      // Payments Today (Joined to invoice to respect salesRepId attribution)
       this.prisma.payment.aggregate({
         _sum: { amount: true },
         where: {
-          paymentDate: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+          invoice: invoiceWhere,
+          status: 'COMPLETED',
+          paymentDate: { gte: todayStart },
         },
       }),
-      // Payments collected this month
+      // Payments Month
       this.prisma.payment.aggregate({
         _sum: { amount: true },
         where: {
-          paymentDate: {
-            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          },
+          invoice: invoiceWhere,
+          status: 'COMPLETED',
+          paymentDate: { gte: monthStart },
         },
       }),
-      // Current outstanding due invoices
-      this.prisma.invoice.aggregate({
-        _sum: { dueBalance: true },
-        where: { ...whereInvoice, status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID] } },
-      }),
-      // Overdue invoices
+      // Invoices Due (Within terms)
       this.prisma.invoice.aggregate({
         _sum: { dueBalance: true },
         where: {
-          ...whereInvoice,
-          status: InvoiceStatus.OVERDUE,
+          ...invoiceWhere,
+          status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID] },
+          dueDate: { gte: todayStart },
         },
+      }),
+      // Invoices Overdue (Lapsed due date)
+      this.prisma.invoice.aggregate({
+        _sum: { dueBalance: true },
+        where: {
+          ...invoiceWhere,
+          status: { in: [InvoiceStatus.OVERDUE, InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID] },
+          dueDate: { lt: todayStart },
+        },
+      }),
+      // Leads Funnel grouped by stage
+      this.prisma.lead.groupBy({
+        by: ['stage'],
+        _count: { id: true },
+        where: leadWhere,
       }),
     ]);
 
-    // 2. Leads Funnel Stage Counts
-    const stageCounts = await this.prisma.lead.groupBy({
-      by: ['stage'],
-      _count: { id: true },
-    });
-
     return {
+      scope: {
+        isStaff: !isExecutive,
+        scopeLabel: !isExecutive ? `Personal Scoped (${currentUser.name})` : 'Enterprise Total (Company-Wide)',
+        userId: currentUser.id,
+      },
       financials: {
         paymentsToday: paymentsToday._sum.amount || 0,
         paymentsMonth: paymentsMonth._sum.amount || 0,
         invoicesDue: dueInvoices._sum.dueBalance || 0,
         invoicesOverdue: overdueInvoices._sum.dueBalance || 0,
       },
-      leadsFunnel: stageCounts.map((s) => ({ stage: s.stage, count: s._count.id })),
+      leadsFunnel: leadsFunnel.map((s) => ({ stage: s.stage, count: s._count.id })),
     };
+  }
+
+  /**
+   * Detailed calculation breakdown, formula, and recalculation schedule audit
+   * Matching GET /api/v1/dashboard/kpi-details/:metricId
+   */
+  async getKpiCalculationDetail(metricId: string, currentUser: AuthenticatedUser) {
+    const isStaff = currentUser.role === UserRole.STAFF;
+    const staffName = currentUser.name;
+
+    switch (metricId) {
+      case 'payments-month':
+        return {
+          id: 'payments-month',
+          title: isStaff ? 'My Revenue - Month' : 'Payments - Month',
+          scope: {
+            isStaff,
+            staffName,
+            scopeLabel: isStaff ? `Personal Scoped (${staffName})` : 'Enterprise Total (Company-Wide)',
+            description: isStaff
+              ? `Strictly restricted to payments credited to invoices owned by ${staffName}.`
+              : 'Consolidated company-wide cleared cash inflow across all 12 staff members.',
+          },
+          formula: isStaff
+            ? 'My Revenue = Σ(Payment.amount WHERE Invoice.sales_rep_id = :myUserId AND payment_date >= MONTH_START)'
+            : 'Payments Month = Σ(Payment.amount WHERE payment_date >= MONTH_START)',
+          schedule: {
+            frequency: 'Real-Time / Instantaneous',
+            frequencyType: 'realtime',
+            triggers: ['Invoice Payment Cleared', 'bKash IPN Webhook', 'Monthly Day 1 Rollover Cron'],
+            cacheTtlSeconds: 60,
+          },
+        };
+
+      case 'invoices-overdue':
+        return {
+          id: 'invoices-overdue',
+          title: isStaff ? 'My Invoices - Overdue' : 'Invoices - Overdue',
+          scope: {
+            isStaff,
+            staffName,
+            scopeLabel: isStaff ? `Personal Scoped (${staffName})` : 'Enterprise Total (Company-Wide)',
+            description: isStaff
+              ? `Delinquent debt on client accounts originated by ${staffName} requiring collection follow-up.`
+              : 'Organization-wide risk capital past due date awaiting collection.',
+          },
+          formula: isStaff
+            ? 'My Overdue = Σ(Invoice.due_balance WHERE sales_rep_id = :myUserId AND due_date < CURRENT_DATE)'
+            : 'Invoices Overdue = Σ(Invoice.due_balance WHERE due_date < CURRENT_DATE)',
+          schedule: {
+            frequency: 'Daily Midnight Cron (00:00 BST) + Real-Time Reduction',
+            frequencyType: 'cron',
+            cronExpression: '0 0 * * *',
+            triggers: ['Nightly Due Date Expiry Cron', 'Payment Ledger Credit', 'Overdue SMS Notice Dispatch'],
+            cacheTtlSeconds: 120,
+          },
+        };
+
+      default:
+        return { id: metricId, status: 'calculated' };
+    }
+  }
+}
+```
+
+---
+
+### 🎯 8.2 How We Track User KPIs: Quotas, Formulas & Performance Metrics
+
+The backend calculates 7 primary KPI metrics to evaluate individual staff sales performance and workforce accountability:
+
+| Metric | Business Definition | Mathematical Formula | Frequency |
+|---|---|---|:---:|
+| **1. Cleared Revenue** | Actual cash collected from clients originated by the staff member | `Σ(Payment.amount WHERE invoice.salesRepId = user.id AND status = 'COMPLETED')` | Real-Time |
+| **2. Quota Achievement Rate** | Progress toward monthly revenue target assigned by Admin | `(Actual Cleared Revenue / StaffTarget.revenueTarget) × 100%` | Real-Time |
+| **3. Lead Conversion Efficiency** | Proportion of assigned prospects converted into Closed Won clients | `(Closed Won Leads / Total Assigned Leads) × 100%` | Real-Time |
+| **4. Average Deal Size** | Mean revenue generated per successfully converted deal | `Total Won Contract Value / Count(Closed Won Deals)` | Real-Time |
+| **5. Sales Velocity (Cycle Days)** | Average number of days required to progress from New Lead to Deal Won | `AVG(EXTRACT(EPOCH FROM (lead.convertedAt - lead.createdAt)) / 86400)` | Weekly / Monthly |
+| **6. Delinquent Debt Ratio** | Percentage of receivables originated by staff that have lapsed into Overdue | `(Overdue Due Balance / Total Issued Invoice Value) × 100%` | Daily (Midnight) |
+| **7. Attendance Compliance** | Working days clocked in on schedule relative to expected shifts | `(Logged Work Days / (Expected Days - Approved Leaves)) × 100%` | Daily (Shift Cutoff) |
+
+#### User Target & Performance Service Implementation
+
+```typescript
+// src/modules/team/staff-kpi.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { Decimal } from '@prisma/client/runtime/library';
+
+@Injectable()
+export class StaffKpiService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Computes comprehensive KPI scorecard for an individual staff member
+   */
+  async getStaffKpiScorecard(staffId: string, month: number, year: number) {
+    const staff = await this.prisma.user.findUnique({
+      where: { id: staffId },
+      include: {
+        staffTargets: {
+          where: { month, year },
+        },
+      },
+    });
+
+    if (!staff) throw new NotFoundException('Staff member not found');
+
+    const target = staff.staffTargets[0] || {
+      revenueTarget: new Decimal(100000), // Default 100,000 BDT
+      leadsWonTarget: 5,
+    };
+
+    const monthStart = new Date(year, month - 1, 1);
+    const monthEnd = new Date(year, month, 0, 23, 59, 59);
+
+    // Aggregate monthly revenue credited to this staff member
+    const revenueSum = await this.prisma.payment.aggregate({
+      _sum: { amount: true },
+      where: {
+        invoice: { salesRepId: staffId },
+        status: 'COMPLETED',
+        paymentDate: { gte: monthStart, lte: monthEnd },
+      },
+    });
+
+    // Lead metrics
+    const [totalAssigned, wonDeals] = await Promise.all([
+      this.prisma.lead.count({
+        where: { assignedStaffId: staffId, createdAt: { gte: monthStart, lte: monthEnd } },
+      }),
+      this.prisma.lead.count({
+        where: { assignedStaffId: staffId, stage: 'CLOSED_WON', updatedAt: { gte: monthStart, lte: monthEnd } },
+      }),
+    ]);
+
+    const actualRevenue = Number(revenueSum._sum.amount || 0);
+    const revenueTargetNum = Number(target.revenueTarget);
+    const quotaAchievementPct = revenueTargetNum > 0 ? (actualRevenue / revenueTargetNum) * 100 : 0;
+    const conversionRatePct = totalAssigned > 0 ? (wonDeals / totalAssigned) * 100 : 0;
+
+    return {
+      staff: { id: staff.id, name: staff.name, designation: staff.designation },
+      period: { month, year },
+      targets: {
+        revenueTarget: revenueTargetNum,
+        leadsWonTarget: target.leadsWonTarget,
+      },
+      actuals: {
+        revenueCollected: actualRevenue,
+        leadsWon: wonDeals,
+        totalAssignedLeads: totalAssigned,
+      },
+      kpis: {
+        quotaAchievementRate: Math.min(Math.round(quotaAchievementPct * 100) / 100, 100),
+        conversionRate: Math.round(conversionRatePct * 100) / 100,
+        averageDealValue: wonDeals > 0 ? Math.round(actualRevenue / wonDeals) : 0,
+      },
+    };
+  }
+
+  /**
+   * Admin sets monthly sales & revenue target quota for a staff member
+   */
+  async setStaffTarget(staffId: string, month: number, year: number, revenueTarget: number, leadsWonTarget: number) {
+    return this.prisma.staffTarget.upsert({
+      where: {
+        staffId_month_year: { staffId, month, year },
+      },
+      update: {
+        revenueTarget: new Decimal(revenueTarget),
+        leadsWonTarget,
+      },
+      create: {
+        staffId,
+        month,
+        year,
+        revenueTarget: new Decimal(revenueTarget),
+        leadsWonTarget,
+      },
+    });
+  }
+}
+```
+
+---
+
+### 💼 8.3 Core CRM Business Logic for Backend Implementation
+
+Backend developers must adhere to the following enterprise rules governing sales, billing, and workforce data:
+
+#### 1. Lead Ownership, Assignment & Handover Lifecycle
+- **Inbound Capture**: Leads from website forms, WhatsApp, or cold inquiries enter in stage `NEW_LEADS`.
+- **Assignment**: Admin manually assigns or system round-robin assigns `assignedStaffId`.
+- **Row-Level Enforcement**: Staff can only view and update leads where `assignedStaffId === currentUser.id`. Admins have universal visibility.
+- **Stage Progression Rules**:
+  - `NEW_LEADS` → `APPOINTMENT_COLLECTED` (Requires appointment datetime).
+  - `APPOINTMENT_COLLECTED` → `DEMONSTRATIONS_DONE` (Requires demo notes).
+  - `DEMONSTRATIONS_DONE` → `PROPOSAL_SENT` (Requires linked Proposal ID).
+  - `PROPOSAL_SENT` → `CLOSED_WON` (Client accepted quotation).
+- **1-Click Conversion Atomicity**:
+  - Executed inside a single `prisma.$transaction`:
+    1. Creates `Client` record with company name and fleet size.
+    2. Creates primary `ClientUser` with phone and email.
+    3. Generates initial `Invoice` with line items, assigning `salesRepId = lead.assignedStaffId`.
+    4. Marks Lead as `isArchived = true` and `convertedToClientId = client.id`.
+
+#### 2. Invoicing & Revenue Attribution Engine
+- **Revenue Ownership**: When an invoice is created, it inherits `salesRepId`. All future payments (full or partial) applied to this invoice are credited to that sales rep's KPI for the calendar month in which the payment is verified.
+- **Partial Payment Formula**:
+  - `paidAmount = SUM(payments.amount WHERE status = 'COMPLETED')`
+  - `dueBalance = totalAmount - paidAmount`
+  - `status = paidAmount >= totalAmount ? 'PAID' : paidAmount > 0 ? 'PARTIALLY_PAID' : 'UNPAID'`
+
+#### 3. Overdue Debt Delinquency & Nightly Cron
+- **Overdue Definition**: Any invoice with `dueBalance > 0` and `dueDate < CURRENT_DATE`.
+- **Automated Midnight Transition Job (`@Cron('0 0 * * *')`)**:
+  - At `00:00:00 Asia/Dhaka` every day, scans all open invoices where `dueDate < today` and updates status to `OVERDUE`.
+  - Dispatches an automated collection notification to the client and flags the delinquent invoice on the assigned sales representative's dashboard.
+
+#### 4. Audit Logging Standard
+- Every financial payment creation, invoice status transition, and lead stage shift must write an entry to `AuditLog` recording:
+  - `userId`, `action` (`PAYMENT_RECORDED`, `STAGE_CHANGED`, `CLIENT_CONVERTED`), `entityId`, `oldValues`, `newValues`, and client IP address.
+
+---
+
+### ⏰ 8.4 Scheduled Cron Worker Implementation
+
+```typescript
+// src/modules/dashboard/dashboard-cron.service.ts
+import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import { PrismaService } from '../prisma/prisma.service';
+import { InvoiceStatus } from '@prisma/client';
+
+@Injectable()
+export class DashboardCronService {
+  constructor(private prisma: PrismaService) {}
+
+  // Daily Midnight Cron at 00:00:00 Asia/Dhaka (BST)
+  @Cron('0 0 * * *', { timeZone: 'Asia/Dhaka' })
+  async handleNightlyDueInvoicesScan() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Transition unpaid invoices past due date to OVERDUE
+    await this.prisma.invoice.updateMany({
+      where: {
+        dueDate: { lt: today },
+        status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID] },
+      },
+      data: { status: InvoiceStatus.OVERDUE },
+    });
+  }
+
+  // Monthly Day 1 Snapshot Archival at 00:05:00 BST
+  @Cron('5 0 1 * *', { timeZone: 'Asia/Dhaka' })
+  async handleMonthlyKpiSnapshotArchival() {
+    const priorMonthDate = new Date();
+    priorMonthDate.setMonth(priorMonthDate.getMonth() - 1);
+    const month = priorMonthDate.getMonth() + 1;
+    const year = priorMonthDate.getFullYear();
+
+    const staffMembers = await this.prisma.user.findMany({
+      where: { role: 'STAFF', isActive: true },
+    });
+
+    for (const staff of staffMembers) {
+      // Archive monthly performance snapshot to StaffKpiSnapshot
+    }
   }
 }
 ```
