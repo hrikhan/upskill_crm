@@ -3,7 +3,6 @@ import { lazy, Suspense } from "react";
 import { routesGenerator } from "@/utils/Generator/RoutesGenerator";
 
 import { adminRoutes } from "./AdminRoutes";
-import { userRoutes } from "./UserRoutes";
 import Skeleton from "@/common/Skeleton";
 
 // Auth card placeholder skeleton
@@ -65,9 +64,8 @@ const routes = createBrowserRouter([
     ),
   },
 
-  // Admin and User routes matching the module route structure
+  // Admin routes matching the module route structure
   ...routesGenerator(adminRoutes),
-  ...routesGenerator(userRoutes),
 
   // Catch-all route
   {

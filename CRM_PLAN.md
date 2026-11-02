@@ -263,7 +263,7 @@ The Dashboard (`/admin/dashboard` in `src/pages/Dashboard/Overview/Overview.tsx`
 | **21** | Sales: Monthly Subscriptions | Recurring GPS monthly software tracking subscriptions, MRR stats, fleet renewals & billing (`/admin/sales/subscriptions`) | ✅ Completed |
 | **22** | Sales: Payments Ledger | Payment receipts transaction ledger, bKash/Bank/Cash channels, and printable receipt (`/admin/sales/payments`) | ✅ Completed |
 | **23** | Sales: Expenses Management | Business expenditure logs for SIM data packages, hardware procurement, and field conveyance (`/admin/sales/expenses`) | ✅ Completed |
-| **24** | Customer Portal View | Customer self-service vehicle & invoice portal with live GPS status (`/user/overview`) | ✅ Completed |
+| **24** | Internal Company Scope | Strictly internal operations platform for staff; clients are commercial accounts managed by staff without external client portal | ✅ Completed |
 | **25** | Field Installation & Maintenance Tasks | Technician dispatch for GPS wiring, fuel sensor calibration, SIM swap (`/admin/tasks`) | ✅ Completed |
 | **26** | Customer Support & Device RMA | Tickets, device offline alarms, remote relay troubleshooting (`/admin/support/tickets`) | ✅ Completed |
 | **27** | Service Contracts & Templates | Annual maintenance contracts, SLA tracking, standardized contract templates & legal clauses (`/admin/contracts`, `/admin/contracts/templates`) | ✅ Completed |

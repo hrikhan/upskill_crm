@@ -37,7 +37,6 @@ You can log in directly using the following credentials or use the 1-click role 
 | **💼 Staff (Sales)** | `sales@upskillcrm.com` | `staff123` | Leads Pipeline, Clients, Proposals *(Billing, Invoices & Reports hidden)* |
 | **💳 Staff (Billing)** | `billing@upskillcrm.com` | `staff123` | Invoices, Monthly Subscriptions, Payments *(Leads hidden)* |
 | **👥 Staff (HR)** | `hr@upskillcrm.com` | `staff123` | Employee Directory, Leave Requests, and Attendance/Timesheets |
-| **🌐 Client Portal** | `client@upskillcrm.com` | `client123` | Customer view for GPS tracking units and payment invoices (`/user/overview`) |
 
 ---
 
@@ -71,11 +70,9 @@ src/
 │   ├── Support/                  # Customer device tickets & RMA
 │   ├── Reports/                  # Sales, revenue, and tracking subscription reports
 │   ├── Settings/                 # Company profile, VAT/Tax rules, alerts
-│   ├── Auth/                     # Login (with Demo Role Switcher), Register, Forgot Password
-│   └── UserDashboard/            # Customer / Client self-service portal
+│   └── Auth/                     # Login (with Demo Role Switcher), Register, Forgot Password
 ├── routes/
-│   ├── AdminRoutes.tsx           # Route guards with lazy-loaded top-level pages
-│   └── UserRoutes.tsx            # Customer portal routes
+│   └── AdminRoutes.tsx           # Route guards with lazy-loaded top-level pages
 ├── store/
 │   └── features/AuthSlice/       # Redux RBAC slice, role presets, permission updater
 ├── hooks/
@@ -94,5 +91,7 @@ src/
 - **Start Development Server**: `npm run dev` (Runs on `http://localhost:5173`)
 - **Type Checking**: `npx tsc --noEmit`
 - **Lint Check**: `npm run lint`
+- **Monorepo & Backend Architecture**: Refer to [`GLOBAL_MONOREPO_PLAN.md`](file:///c:/All%20Project/upskill_crm/GLOBAL_MONOREPO_PLAN.md) and [`CRM_PLAN.md`](file:///c:/All%20Project/upskill_crm/CRM_PLAN.md) for full context.
 
 All developers and agents working on this repository must read this file before making modifications.
+
