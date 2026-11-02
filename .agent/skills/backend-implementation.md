@@ -78,3 +78,34 @@ backend/
 - [ ] Dashboard KPI engine implements `/api/v1/dashboard/kpi-details/:metricId` with explicit formula metadata, cron schedules (`0 0 * * *` BST), and Redis cache invalidation on payment/lead mutations.
 - [ ] Enforce Row-Level Security (RLS) in Dashboard and Analytics: Staff members (`role === 'STAFF'`) only see their personal revenue and assigned leads (`where: { salesRepId: user.id }`), whereas Super Admin and Admins receive enterprise-wide totals.
 - [ ] Track User KPIs via `StaffTarget` and `StaffKpiSnapshot` entities: Quota achievement rate, lead conversion efficiency, average deal size, delinquent debt balance, and attendance compliance.
+
+---
+
+## 🔌 Frontend to Backend Local Integration Rule
+
+1. **Frontend Base API URL**:
+   - `c:/All Project/upskill_crm/.env`: `VITE_API_BASE_URL=http://localhost:5000/api/v1`
+   - Read by `src/store/Api/BaseApi/BaseApi.ts` using `import.meta.env.VITE_API_BASE_URL`.
+2. **CORS Requirement**:
+   - NestJS `main.ts` must allow `http://localhost:5173` with `credentials: true`.
+3. **Authorization Header**:
+   - Redux automatically sends `Authorization: Bearer <token>` from `state.auth.user.accessToken`.
+
+---
+
+## 🗺️ 14-Step Feature-by-Feature Backend Implementation Roadmap
+
+1. **Step 01 - Foundation Config**: Neon Postgres + Upstash Redis URL configuration & Prisma initialization.
+2. **Step 02 - System Design Architecture**: Global Interceptors, Exception Filters, CORS & DTO Pipes.
+3. **Step 03 - Auth & 3-Tier Dynamic RBAC Engine**: `/api/v1/auth/login`, Refresh Tokens, `@Roles()`, `@RequirePermissions()`.
+4. **Step 04 - Super Admin Provisioning**: `/api/v1/admins` (Exclusive to `SUPER_ADMIN`).
+5. **Step 05 - Staff Management & Dynamic RBAC**: `/api/v1/team/members` with checklist permission updater.
+6. **Step 06 - HR Operations**: Leaves (`/api/v1/team/leaves`) & Timesheets (`/api/v1/team/timesheets`).
+7. **Step 07 - Leads Pipeline**: 6-stage kanban + 1-click transactional conversion to Client.
+8. **Step 08 - Customers & Client Users**: Commercial fleet records & contact directory.
+9. **Step 09 - Invoices & Partial Payments Engine**: Atomic calculation of `paidAmount`, `dueBalance`, and status.
+10. **Step 10 - Subscriptions**: Monthly recurring GPS cloud tracking subscriptions & automated renewals.
+11. **Step 11 - Payments & Expenses**: Payment receipt ledger & hardware/SIM expenditure logs.
+12. **Step 12 - Proposals, Contracts & Projects**: Deployment rollouts with standardized templates.
+13. **Step 13 - Analytics & Dashboard with Redis**: KPI cache-aside, cron recalculator, and Row-Level Security.
+14. **Step 14 - Production Deployment**: Render Web Service + Cheap Custom Subdomain (`api.yourdomain.com`).

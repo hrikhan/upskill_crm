@@ -91,5 +91,7 @@ src/
 - **Start Development Server**: `npm run dev` (Runs on `http://localhost:5173`)
 - **Type Checking**: `npx tsc --noEmit`
 - **Lint Check**: `npm run lint`
+- **Monorepo & Backend Architecture**: Refer to [`GLOBAL_MONOREPO_PLAN.md`](file:///c:/All%20Project/upskill_crm/GLOBAL_MONOREPO_PLAN.md) and [`CRM_PLAN.md`](file:///c:/All%20Project/upskill_crm/CRM_PLAN.md) for full context.
 
 All developers and agents working on this repository must read this file before making modifications.
+
